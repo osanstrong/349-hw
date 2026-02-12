@@ -9,6 +9,13 @@ h = 1000 # W/m²K
 r_i = 0.5 # m
 r_o = 0.6 # m
 
+# Part d: Set new operating conditions
+# Increased q
+q = 2e5
+# MAXIMUM of what we can do to counter this by increasing water speed and decreasing thickness
+r_o = 0.54
+h = 5000
+
 
 r_rw = np.linspace(0, r_i, 1000)
 
