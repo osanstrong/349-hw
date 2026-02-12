@@ -12,26 +12,20 @@ r_o = 0.6 # m
 
 r_rw = np.linspace(0, r_i, 1000)
 
+# Fully direct formula for T_rw as requested in 3.86c
 def get_T_rw(r):
-    # return (-q/(6*k_rw)) * r**2  + (-2*q*r_i**3 / (3*k_rw)) / r   +    TINF  +    (r_i**2*q / 3) * ((1-r_i/r_o)/k_ss + r_i/(r_o**2*h))\
     return (-q/(6*k_rw)) * r**2   +   q*r_i**2/3 * (0.5/k_rw + (1-r_i/r_o)/k_ss + r_i/(r_o**2*h)) + TINF
 
-# T_rw = (-q/(6*k_rw)) * r_rw**2  + (-2*q*r_i**3 / (3*k_rw)) / r_rw   +    TINF  +    (r_i**2*q / 3) * ((1-r_i/r_o)/k_ss + r_i/(r_o**2*h))
 T_rw = get_T_rw(r_rw)
 
 C1 = -r_i**3 * q / (3*k_ss)
 C2 = TINF + (r_i**3*q/(3*r_o)) * (1/(r_o*h) - 1/k_ss)
-# C3 = 2*q*r_i**3 / (3*k_rw)
-# C4 = TINF  +    (r_i**2*q / 3) * ((1-r_i/r_o)/k_ss + r_i/(r_o**2*h))
-# C3 = 416.67
-# C4 = 1170.83
 C3 = 0
-# C4 = q*r_i**2/(6*k_rw) - C1/r_i + C2
 C4 = (q*r_i**2 / 3) * (0.5/k_rw + (1-r_i/r_o)/k_ss + r_i/(r_o**2*h)) + TINF
 
+# T_rw but using the defined coefficients instead of writing out the full formula directly
 def get_T_rwb(r):
     return (-q/(6*k_rw)) * r**2 - C3 / r + C4
-# T_rwb = (-q/(6*k_rw)) * r_rw**2 - C3 / r_rw + C4
 T_rwb = get_T_rwb(r_rw)
 
 
