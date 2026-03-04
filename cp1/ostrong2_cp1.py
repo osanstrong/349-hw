@@ -1,3 +1,9 @@
+import json
+import os.path
+
+INPUT_PATH="input.json"
+BASE_OUTPUT_PATH="output"
+input = json.load(open(INPUT_PATH))
 
 # Copper Material Properties
 rho = 8933 # kg / m^3
@@ -6,26 +12,25 @@ k = 401 # W / m*K
 alph = k / (rho*c_p) # (m^2 / s)
 
 # Fluid properties
-h = 49.96 # W/m^2*K
-T_INF = 25 # C
+h = input["h_Wm-2K-1"] # W/m^2*K
+T_INF = input["T_INF_C"] # C
 
 # Experiment Setup
-R = 0.01 # m
-N_NODES = 40
+R = input["R_m"] # m
+N_NODES = input["N_NODES"]
 dr = R / (N_NODES - 0.5) # m, chosen so that final node (N-1) + 0.5 corresponds to the radius R, the exact surface  
-T_0 = 84 # C
-t_final = 95 # s
+T_0 = input["T_0_C"] # C
+t_final = input["total_time_s"] # s
 
 # Secondary setup (necessary dt)
-SAFETY = 0.75 # Use smaller Fo than necessary
+SAFETY = input["SAFETY"] # Use smaller Fo than necessary
 Bi = h*dr/k # Biot number, dimless
 n_edge = N_NODES-0.5 # n of the last node, corresponds to radius of surface
 n_inge = n_edge-0.5 # n of the border with second to last node (inside edge)
 Fo = SAFETY * (1 / (3 * (n_inge**2/(n_edge**3 - n_inge**3)  +  Bi*n_edge**2/(n_edge**3 - n_inge**3))))
 # print(f"Biot: {Bi}, Fo: {Fo}")
 dt = Fo * dr**2 / alph
-# print(f"dt: {dt} s")
-print(f"Fourier: {Fo} vs {alph * dt / (dr**2)}")
+print(f"dt: {dt} s")
 
 T_vals:list = [T_0 for i in range(N_NODES)] #
 n_vals:list = [i+0.5 for i in range(N_NODES)] # The actual value n of each node (where radius = n*dr)
@@ -37,6 +42,8 @@ p = 0
 num_timesteps = t_final / dt
 num_prints = 15
 print_freq = int(num_timesteps / num_prints)
+
+t_steps = []
 while (t_elapsed < t_final):
     T_vals_next = [0 for i in range(N_NODES)] # Filler list
     
@@ -62,10 +69,26 @@ while (t_elapsed < t_final):
     
 
     T_vals_sets.append(T_vals)
+    t_steps.append(t_elapsed)
     t_elapsed += dt
     T_vals = T_vals_next
     p+=1
     
     if (p % print_freq == 0 or t_elapsed >= t_final): print(f"T({t_elapsed:2.3f}s) = {[f"{T:.3f}" for T in T_vals_next]}C")
+T_vals_sets.append(T_vals)
+t_steps.append(t_elapsed)
+
+output = {
+    "input":input,
+    "t_steps":t_steps,
+    "T_vals":T_vals_sets
+}
+
+next_idx = 0
+output_path = BASE_OUTPUT_PATH + ".json"
+while os.path.isfile(output_path):
+    output_path = BASE_OUTPUT_PATH + f"_{next_idx}.json"
+    next_idx+=1
+json.dump(output, open(output_path, "w"), indent=4)
 
 
