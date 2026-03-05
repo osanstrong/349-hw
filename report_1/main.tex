@@ -168,10 +168,10 @@ Since in Equation~\ref{eq:stability}, the characteristic length and time in $F_o
 \begin{equation}
    F_o \leq \frac{1}{3 (\Gamma_i + B_i\Gamma_e)} 
 \end{equation}
-then solved for the maximum stable timestep $\Delta t$:
+then solved for the maximum stable timestep $\Delta t_{max}$:
 \begin{gather*}
     \frac{\alpha \Delta t}{\Delta r^2}\leq \frac{1}{3 (\Gamma_i + B_i\Gamma_e)}\\
-    \boxed{\Delta t \leq \frac{\Delta r^2}{3\alpha (\Gamma_i + B_i\Gamma_e)}}
+    \boxed{\Delta t_{max} = \frac{\Delta r^2}{3\alpha (\Gamma_i + B_i\Gamma_e)}}
 \end{gather*}
 
 \section{Experimental Procedure}\label{sec:methods}
@@ -179,7 +179,7 @@ then solved for the maximum stable timestep $\Delta t$:
 A \Python script was constructed, implementing Equations~\ref{eq:efd}, \ref{eq:fd-surface}, and \ref{eq:stability} to solve for the temperature distribution within a pure copper sphere (Using tabulated material propertiy data\cite{bergman_fundamentals_2017}).
 This script, as well as accompanying sample input and output files, are included in Appendix~\ref{app:efd-script}.\\
 
-The initial temperature of the sphere $T_0$, and surface temperature $T_1$ after known time $t_1$ in a fluid of known temperature $T_f$, are understood for the problem.
+The initial temperature of the sphere $T_0=84^\circ$C, and surface temperature $T_1=64^\circ$C after known time $t_1=95$s in a fluid of known temperature $T_f=25^\circ$C, are understood for the problem.
 Using the analytical solution in Equation~\ref{eq:anal}, the necessary surface convection coefficient $h$ was solved for.
 Using this value of $h$, the Biot number of the whole sphere was calculated, and used to check the validity of the lumped sum approximation.\\
 
@@ -193,9 +193,118 @@ Three values of $\Delta t$ were assessed: the maximum stable $\Delta t$ evaluate
 
 Finally, using a radial discretization across 15 nodes, numerical solutions were made for a system with the original parameters, and a system with heavily reduced conduction $\frac{k}{1000}$ to show the effect of Biot number on the validity of the lumped sum approximation.
 \section{Experimental Results}\label{sec:results}
-\section{Discussion}\label{sec:disc}
-\section{Conclusions}\label{sec:conc}
+Using Equation~\ref{eq:anal} and the known parameters of the system at time $t_1=95$s:
+\begin{gather*}
+    \bar{\theta}=\bar{\theta_0}e^{-\frac{t_1}{\tau}}\\
+    (64-25)=(84-25)e^{-\frac{t_1}{\tau}}\\
+    e^{-\frac{t_1}{\tau}}=\frac{64-25}{84-25}\\
+    -\frac{t_1}{\tau}=\ln{\left(\frac{64-25}{84-15}\right)}=-0.413\\
+    \tau=\frac{95\mathrm{s}}{0.413}=229.5\mathrm{s}\\
+    \note \tau = \frac{\rho c_pV}{hA}\\
+    h = \frac{\rho c_p V}{\tau A}
+\end{gather*}
+Using tabulated copper properties $\rho=8933\mathrm{\frac{kg}{m^3}}$, $c_p=385\mathrm{\frac{J}{kg\cdot K}}$, and sphere radius $R=0.01\mathrm{m}$:
+\begin{equation}
+    h = 49.956\mathrm{\frac{W}{m^2\cdot K}}
+\end{equation}
+a final thermal convection coefficient of $ 49.956\mathrm{\frac{W}{m^2\cdot K}}$\xspace was obtained.\\
 
+This yielded a Biot number for the spherical system:
+\begin{equation}
+    B_i=\frac{hD}{k}=\frac{49.956\mathrm{\frac{W}{m^2\cdot K}}\cdot 0.02\mathrm{m}}{401\mathrm{\frac{W}{m\cdot K}}}=0.00249<0.1
+\end{equation}
+validating the lumped-sum approximation.
+\FloatBarrier\subsection{Analytical Solution}
+Using the identified value of $h$, an analytic solution was successfully built according to Equation~\ref{eq:anal}.\\
+
+Using the complete analytic solution yielded a $t_{final}=1992.525\mathrm{s}$:
+\begin{gather*}
+    \bar{\theta}=\bar{\theta_0}e^{-\frac{t_{final}}{\tau}}\\
+    (25.01-25)=(84-25)e^{-\frac{t_{final}}{\tau}}\\
+    e^{-\frac{t_{final}}{\tau}}=\frac{25.01-25}{84-25}\\
+    -\frac{t_{final}}{\tau}=\ln{\left(\frac{25.01-25}{84-15}\right)}=-8.68\\
+    t_{final}=8.68\times 229.5\mathrm{s}=\boxed{1992.525\mathrm{s}}
+\end{gather*}
+Figure~\ref{fig:a1-full} showcases the analytic solution across $0\leq t\leq 1992.525\mathrm{s}$, while Figure~\ref{fig:a1-zoom95} focuses on behavior near $t\approx95$s. Based on the low Biot number suggesting validity of the lumped sum approach, and the temperature at $T(t=95\mathrm{s})\approx64^\circ$C closely matching the known observation ($T_{surf}(95\mathrm{s})=64^\circ$C), the analytic solution appears to be a reasonably accurate description of the system, with temperature gradually approaching 25$^\circ$C in exponential decay.
+\begin{figure}
+    \centering
+    \includegraphics[width=\figwidth]{fig/A1_full.png}
+    \caption{The lumped sum analytical solution of $T(t)$ across times $0\leq t\leq 1992.525\mathrm{s}$.}
+    \label{fig:a1-full}
+\end{figure}
+\begin{figure}
+    \centering\includegraphics[width=\figwidth]{fig/A1_zoom95.png}
+    \caption{The lumped sum analytical solution of $T(t)$, focused on $t=95$s.}
+    \label{fig:a1-zoom95}
+\end{figure}
+
+Figure~\ref{fig:a2-sav} compares the transient temperature behavior for spheres of different surface area to volume ratios. 
+% SA to volume ratio 
+\begin{figure}
+    \centering\includegraphics[width=\figwidth]{fig/A2_compDims.png}
+    \caption{The analytical transient temperature behavior for copper spheres of the original dimensions, doubled surface area, and doubled radius.}
+    \label{fig:a2-sav}
+\end{figure}
+
+Figure~\ref{fig:a2-h} compares the transient temperature behavior for spheres of identical starting temperature to the original system, but with different convective coefficients at the fluid boundary.
+% h
+\begin{figure}
+    \centering\includegraphics[width=\figwidth]{fig/A2_compH.png}
+    \caption{The analytical transient temperature behavior for copper spheres in the original fluid and fluids yielding double and half the convective coefficients, respectively.}
+    \label{fig:a2-h}
+\end{figure}
+
+\FloatBarrier\subsection{Numerical Solution}\FloatBarrier
+Using the identified value of $h$, a numerical solution according to the explicit finite difference scheme of Equation~\ref{eq:efd} was successfully constructed, as shown in Appendix~\ref{app:efd-script}, with the following results:\\
+
+In Figure~\ref{fig:b1-dt}, such numerical solutions without discretization in space (having only a single node, akin to the lumped-sum model), are shown for different discretizations in time, with a timestep $\Delta t$ ranging from the minimum stable value of 172.112s to a value of 9.963 seconds (yielding 200 timesteps).
+\begin{figure}
+    \centering\includegraphics[width=\figwidth]{fig/B1_dt.png}
+    \caption{A single-node explicit finite difference solution for $T(t)$, evaluated for $\Delta t\in\left\{\Delta t_{max}, \frac{t_{final}}{20}, \frac{t_{final}}{200}\right\}$, compared to the lumped sum analytical solution. }    
+    \label{fig:b1-dt}
+\end{figure}
+
+Figure~\ref{fig:b1-k} compares solutions with 15 different radial nodes, solving for a range of temperatures from the inside of the sphere to the outside over time.
+Specifically, it compares two such solutions, one for the original system parameters, and one for which the copper of thermal conductivity $k=401\mathrm{\frac{W}{m\cdot K}}$ has been replaced with a material with identical properties saved for a drastically reduced conductivity $k_2=0.401\mathrm{\frac{W}{m\cdot K}}$, resulting in a Biot number $B_{i,2}=2.492$.
+In the figure, the range of minimum (at edge) and maximum (at center) temperatures of the spheres may be observed over time.
+\begin{figure}
+    \centering\includegraphics[width=\figwidth]{fig/B1_k.png}
+    \caption{A 15-node explicit finite difference solution for $T(t)$ of both the original system, and one with a heavily reduced thermal conductivity $k$ and increased Biot number, showing the range of temperatures at any time $0\leq t\leq t_{final}$ for either system. Both are evaluated with $\Delta t=\Delta t_{max}$ for the given spacial discretization.}
+    \label{fig:b1-k}
+\end{figure}
+
+\FloatBarrier\section{Discussion}\label{sec:disc}
+Based on the low Biot number $B_i=0.00249<0.1$ suggesting validity of the lumped sum approach, and the analytical temperature at $T(t=95\mathrm{s})\approx64^\circ$C closely matching the known observation ($T_{surf}(95\mathrm{s})=64^\circ$C) in Figure~\ref{fig:a1-zoom95}, the analytic solution displayed in Figure~\ref{fig:a1-full} appears to be a reasonably accurate description of the system, with temperature gradually approaching 25$^\circ$C in exponential decay.\\
+
+Comparison of different geometries in Figure~\ref{fig:a2-sav} highlights a noticeable dependence of behavior on the ratio of surface area to volume.
+The sphere of double radius (yielding half the surface area to volume ratio), approaches the fluid temperature much more slowly, whereas the sphere of identical dimensions with doubled surface area (double the surface area to volume ratio) approaches the fluid temperature much more quickly.\\
+
+Likewise, comparison of the different convection coefficients in Figure~\ref{fig:a2-h} highlights a very similar dependence of transient behavior on this coefficient.
+In the fluid where $h$ was doubled, temperature approached that of the fluid very quickly, and vice versa.\\
+
+These observations are both congruent with the analytic solution to temperature of Equation~\ref{eq:anal}:
+\begin{align*}
+    \bar{\theta}&=\bar{\theta_0}e^{-\frac{t}{\tau}}\\
+    &=\bar{\theta_0}e^{-\frac{hAt}{\rho c_p V}}
+\end{align*}
+which suggests that either a higher value of $h$ or ratio $A/V$ yields faster behavior, and vice versa.\\
+
+Across the various discretizations in time of single-node finite-difference solutions, shown in Figure~\ref{fig:b1-dt}, a trend in accuracy can be observed where finer values of $\Delta t$ yield a transient behavior much closer to the analytical solution.
+This can be explained as a natural consequence of the explicit finite difference scheme.
+Since the temperature at a time $\Delta t$ later is evaluated using the difference in temperature over space \emph{now}, the scheme assumes that the temperature variation over space does not change much over that time period.
+But since the temperature difference driving this change necessarily decays in time, this scheme will consistently overestimate the magnitude of change by some amount.
+For larger and larger values of $\Delta t$, over which the temperature gradient would itself change more and more, this leads to a more and more rapidly decaying solution, as seen in the figure, where the maximally coarse solution using $\Delta t_{max}$ approaches the fluid temperature drastically faster.\\
+
+Figure~\ref{fig:b1-k} shows the importance of determining whether a lumped-sum approach is valid, and the power of finite difference scheme.
+While for the given system, which has a Biot number of $0.00249$, the lumped sum approach is demonstrably valid, with a nearly imperceptible range of temperatures from the center to the edge, the comparable system with less conductivity quickly develops a very substantial gradient in temperature, eventually taking longer to approach fluid temperature as heat struggles to move from the interior to the surface.
+
+The spatially-discretized solutions, even with only 15 nodes, allows this transient behavior to be clearly observed without an analytical solution, with the Biot number for an individual differential node remaining sufficiently low to simulate ($B_{i, node}=\frac{h\Delta r}{k}=0.086$).
+
+
+\section{Conclusions}\label{sec:conc}
+The goals of this report were largely met.\\
+
+An analytical model of the system's transient behavior was successfully designed and used to estimate a convection coefficient $h=49.956\mathrm{\frac{W}{m^2\cdot K}}$.
 % \bibliographystyle{sty/ieeetran}
 \pagebreak
 \printbibliography
