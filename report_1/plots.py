@@ -67,15 +67,56 @@ h2 = h*2
 tau = rho*c_p*V / (h2*A)
 T_h2 = T_INF + (T_0-T_INF)*np.exp(-t / tau)
 
-plt.plot(t, T_A1, label=f"Base h ({h:.3f}W/(m^2K))")
-plt.plot(t, T_2A, label=f"Double h ({h2:.3f}W/(m^2K))")
+# plt.plot(t, T_A1, label=f"Base h ({h:.3f}W/(m^2K))")
+# plt.plot(t, T_2A, label=f"Double h ({h2:.3f}W/(m^2K))")
+# plt.xlabel("t (s)")
+# plt.ylabel("T (degrees C)")
+# plt.legend()
+# plt.show()
+
+
+# Plot analytic vs different dt of FD
+
+def load(path):
+    with open(path, 'r') as file:
+        return json.load(file)
+    
+def plot_edgeT(output, label, color=None):
+    if color is None:
+        plt.plot(output["t_steps"], [T[-1] for T in output["T_vals"]], label=label)
+    else:
+        plt.plot(output["t_steps"], [T[-1] for T in output["T_vals"]], label=label, c=color)
+    
+LUMP_MIN = load("B_lumped_auto.json")
+LUMP_20 = load("B_lumped_20step.json")
+LUMP_200 = load("B_lumped_200step.json")
+
+# plt.plot(t, T_A1, label=f"Analytical solution")
+# plot_edgeT(LUMP_MIN, label=f"Minimum stable dt: {LUMP_MIN["dt"]:.3f}s")
+# plot_edgeT(LUMP_20, label=f"dt for 20 steps: {LUMP_20["dt"]}s")
+# plot_edgeT(LUMP_200, label=f"dt for 200 steps: {LUMP_200["dt"]}s")
+
+# plt.xlabel("t (s)")
+# plt.ylabel("T (degrees C)")
+# plt.legend()
+# plt.show()
+
+
+# Plot analytic vs different k
+
+K_NORM = load("B_15node_1k.json")
+K_SMOL = load("B_15node_0001k.json")
+
+def plot_rangeT(output, label):
+    ranges = output['T_vals']
+    plt.fill_between(output['t_steps'], [r[0] for r in ranges], [r[-1] for r in ranges], label=label, alpha=0.4, color="C1")
+
+plot_rangeT(K_SMOL, f"k = 0.401W/mK, Bi = {K_SMOL["Biot (D)"]:.3f}")
+plot_edgeT(K_NORM, f"k = 401W/mK, Bi = {K_NORM["Biot (D)"]:.6f}", color="C0")
+
 plt.xlabel("t (s)")
 plt.ylabel("T (degrees C)")
 plt.legend()
 plt.show()
 
-
-# Plot analytic vs different dt of FD
-
-# Plot analytic vs different dr
 
