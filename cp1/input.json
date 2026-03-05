@@ -1,11 +1,16 @@
 {
+    "k_Wm-1K-1":401,
+
     "T_INF_C":25,
     "T_0_C":84,
-    "total_time_s":95,
+    "total_time_s":1992.525237,
     "R_m":0.01,
-    "N_NODES":10,
+    "N_NODES":100,
+    "h_Wm-2K-1":49.95605733,
 
-    "h_Wm-2K-1":49.96,
+
+    "dt":"auto",
+    "num_t_output":50,
 
     "SAFETY":0.75
 }

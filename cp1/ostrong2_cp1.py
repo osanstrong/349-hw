@@ -2,13 +2,16 @@ import json
 import os.path
 
 INPUT_PATH="input.json"
-BASE_OUTPUT_PATH="output"
+BASE_OUTPUT_PATH="output/output"
 input = json.load(open(INPUT_PATH))
 
 # Copper Material Properties
 rho = 8933 # kg / m^3
 c_p = 385 # J / kg*K
-k = 401 # W / m*K
+if "k_Wm-1K-1" in input:
+    k = input["k_Wm-1K-1"] # W / m*K, default of 401
+else:
+    k = 401
 alph = k / (rho*c_p) # (m^2 / s)
 
 # Fluid properties
@@ -30,6 +33,9 @@ n_inge = n_edge-0.5 # n of the border with second to last node (inside edge)
 Fo = SAFETY * (1 / (3 * (n_inge**2/(n_edge**3 - n_inge**3)  +  Bi*n_edge**2/(n_edge**3 - n_inge**3))))
 # print(f"Biot: {Bi}, Fo: {Fo}")
 dt = Fo * dr**2 / alph
+if "dt" in input and not input["dt"]=="auto":
+    dt = input["dt"]
+    Fo = dt*alph / (dr**2)
 print(f"dt: {dt} s")
 
 T_vals:list = [T_0 for i in range(N_NODES)] #
@@ -40,46 +46,53 @@ t_elapsed = 0
 T_vals_sets = [] #List of every T distribution at each timestep.
 p = 0
 num_timesteps = t_final / dt
-num_prints = 15
+num_prints = min(input["num_t_output"], num_timesteps)
 print_freq = int(num_timesteps / num_prints)
 
 t_steps = []
 while (t_elapsed < t_final):
     T_vals_next = [0 for i in range(N_NODES)] # Filler list
     
-    # Center node
-    T_n0 = T_vals[0]
-    T_n1 = T_vals[1]
-    n0 = n_vals[0]
-    nh = n0 + 0.5
-    T_vals_next[0] = T_n0 + Fo * (nh**2 / n0**2) * (T_n1-T_n0) 
+    if N_NODES > 1:
+        # Center node
+        T_n0 = T_vals[0]
+        T_n1 = T_vals[1]
+        n0 = n_vals[0]
+        nh = n0 + 0.5
+        T_vals_next[0] = T_n0 + Fo * (nh**2 / n0**2) * (T_n1-T_n0) 
 
-    for i in range(1, N_NODES-1): # Interior nodes, not special cases
-        n = n_vals[i]
-        T_n = T_vals[i]
-        T_i = T_vals[i-1]
-        T_o = T_vals[i+1]
+        for i in range(1, N_NODES-1): # Interior nodes, not special cases
+            n = n_vals[i]
+            T_n = T_vals[i]
+            T_i = T_vals[i-1]
+            T_o = T_vals[i+1]
 
-        T_vals_next[i] = T_n + Fo * ((n+0.5)**2*(T_o-T_n) - (n-0.5)**2*(T_n-T_i)) / n**2
-        # print(f"new T_{i}: {T_vals_next[i]}")
+            T_vals_next[i] = T_n + Fo * ((n+0.5)**2*(T_o-T_n) - (n-0.5)**2*(T_n-T_i)) / n**2
+            # print(f"new T_{i}: {T_vals_next[i]}")
 
-    # Exterior node
-    T_nf = T_vals[-1]
-    T_vals_next[-1] = T_nf + 3*Fo * ((n_inge**2/(n_edge**3 - n_inge**3))*(T_vals[-2]-T_nf) + (Bi*n_edge**2/(n_edge**3 - n_inge**3))*(T_INF-T_nf))
+        # Exterior node
+        T_nf = T_vals[-1]
+        T_vals_next[-1] = T_nf + 3*Fo * ((n_inge**2/(n_edge**3 - n_inge**3))*(T_vals[-2]-T_nf) + (Bi*n_edge**2/(n_edge**3 - n_inge**3))*(T_INF-T_nf))
+    else:
+        T_nf = T_vals[0]
+        T_vals_next[0] = T_nf + 3*Fo * (Bi*n_edge**2/(n_edge**3 - n_inge**3))*(T_INF-T_nf)
+
     
-
-    T_vals_sets.append(T_vals)
-    t_steps.append(t_elapsed)
     t_elapsed += dt
     T_vals = T_vals_next
     p+=1
     
-    if (p % print_freq == 0 or t_elapsed >= t_final): print(f"T({t_elapsed:2.3f}s) = {[f"{T:.3f}" for T in T_vals_next]}C")
+    if (p % print_freq == 0 or t_elapsed >= t_final):
+        print(f"T({t_elapsed:2.3f}s) = {[f"{T:.3f}" for T in T_vals_next]}C")
+        T_vals_sets.append(T_vals)
+        t_steps.append(t_elapsed)
 T_vals_sets.append(T_vals)
 t_steps.append(t_elapsed)
 
 output = {
     "input":input,
+    "Biot (dr)":Bi,
+    "Biot (D)":h*(2*R)/k,
     "t_steps":t_steps,
     "T_vals":T_vals_sets
 }
