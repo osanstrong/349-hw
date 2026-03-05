@@ -43,13 +43,20 @@ n_vals:list = [i+0.5 for i in range(N_NODES)] # The actual value n of each node 
 
 
 t_elapsed = 0
+t_steps = []
 T_vals_sets = [] #List of every T distribution at each timestep.
 p = 0
 num_timesteps = t_final / dt
 num_prints = min(input["num_t_output"], num_timesteps)
 print_freq = int(num_timesteps / num_prints)
 
-t_steps = []
+def push():
+    print(f"T({t_elapsed:2.3f}s) = {[f"{T:.3f}" for T in T_vals]}C")
+    T_vals_sets.append(T_vals)
+    t_steps.append(t_elapsed)
+
+push()
+
 while (t_elapsed < t_final):
     T_vals_next = [0 for i in range(N_NODES)] # Filler list
     
@@ -82,19 +89,17 @@ while (t_elapsed < t_final):
     T_vals = T_vals_next
     p+=1
     
-    if (p % print_freq == 0 or t_elapsed >= t_final):
-        print(f"T({t_elapsed:2.3f}s) = {[f"{T:.3f}" for T in T_vals_next]}C")
-        T_vals_sets.append(T_vals)
-        t_steps.append(t_elapsed)
-T_vals_sets.append(T_vals)
-t_steps.append(t_elapsed)
+    if (p % print_freq == 0 or p < 10):
+        push()
+push()
 
 output = {
     "input":input,
     "Biot (dr)":Bi,
     "Biot (D)":h*(2*R)/k,
     "t_steps":t_steps,
-    "T_vals":T_vals_sets
+    "T_vals":T_vals_sets,
+    "dt":dt
 }
 
 next_idx = 0
