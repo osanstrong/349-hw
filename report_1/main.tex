@@ -23,6 +23,7 @@
 \usepackage{xcolor}
 \usepackage[colorlinks=true, citecolor=violet, linkcolor=violet, urlcolor=violet]{hyperref}
 \usepackage{enumitem}
+\usepackage{xspace}
 
 \begin{document}
 \pagenumbering{gobble}
@@ -99,9 +100,12 @@ This equation, which now only considers one variable, can be solved by changing 
     \ln(\bar{\theta}) = -\frac{t}{\tau} + C\\
     \bar{\theta}=Ce^{-\frac{t}{\tau}}\\
     \color{gray}\rightarrow \bar{\theta}(t=0)=\bar{\theta_0}\\
-    \bar{\theta_0}=Ce^{-\frac{0}{\tau}}=C\\
-    \boxed{\bar{\theta}=\bar{\theta_0}e^{-\frac{t}{\tau}}}
+    \bar{\theta_0}=Ce^{-\frac{0}{\tau}}=C
 \end{gather*}
+\begin{equation}
+    \label{eq:anal}
+    \bar{\theta}=\bar{\theta_0}e^{-\frac{t}{\tau}}
+\end{equation}
 
 If one component out of the material properties contained in the time constant $\tau$, the initial temperature difference $\bar{\theta_0}$, the time $t$, or the temperature difference $\bar{\theta}$ at that time, this equation can be used to solve for the missing value of otherwise known system, such as the convection coefficient necessary in a fluid for a given conductive sphere to go from an initial temperature to a known final temperature within that fluid after a known time.\\
 
@@ -171,10 +175,228 @@ then solved for the maximum stable timestep $\Delta t$:
 \end{gather*}
 
 \section{Experimental Procedure}\label{sec:methods}
+\newcommand{\Python}{\texttt{Python}\xspace}
+A \Python script was constructed, implementing Equations~\ref{eq:efd}, \ref{eq:fd-surface}, and \ref{eq:stability} to solve for the temperature distribution within a pure copper sphere (Using tabulated material propertiy data\cite{bergman_fundamentals_2017}).
+This script, as well as accompanying sample input and output files, are included in Appendix~\ref{app:efd-script}.\\
+
+The initial temperature of the sphere $T_0$, and surface temperature $T_1$ after known time $t_1$ in a fluid of known temperature $T_f$, are understood for the problem.
+Using the analytical solution in Equation~\ref{eq:anal}, the necessary surface convection coefficient $h$ was solved for.
+Using this value of $h$, the Biot number of the whole sphere was calculated, and used to check the validity of the lumped sum approximation.\\
+
+The analytic solution was then evaluated over a range of time $0\leq t \leq t_{final}$, where $t_{final}$ is the analytically evaluated time when the sphere's temperature reaches $\approx25.01^{\circ}$C.
+This evaluation was repeated with variations in geometry, and variations in the convection coefficient $h$ to assess the effects of these system parameters.
+For geometry comparison, the base system was compared to a system of double radius, and a system of identical radius but hypothetical double surface area (approximating a wrinkled surface of sorts).
+For convection coefficient comparison, values of $2h$, $\frac{h}{2}$, and the original $h$ were compared.\\
+
+Using the \Python script, the numerical solution was evaluated first discretized over one node (matching the lumped sum analytic solution) and over various different $\Delta t$ and compared to the analytic solution, to assess the effect of varying time frequency.
+Three values of $\Delta t$ were assessed: the maximum stable $\Delta t$ evaluated using Equation~\ref{eq:stability}, a $\Delta t=\frac{t_{final}}{20}$ to yield 20 timesteps, and a $\Delta t = \frac{t_{final}}{200}$ to yield 200 timesteps.\\
+
+Finally, using a radial discretization across 15 nodes, numerical solutions were made for a system with the original parameters, and a system with heavily reduced conduction $\frac{k}{1000}$ to show the effect of Biot number on the validity of the lumped sum approximation.
 \section{Experimental Results}\label{sec:results}
 \section{Discussion}\label{sec:disc}
 \section{Conclusions}\label{sec:conc}
 
 % \bibliographystyle{sty/ieeetran}
+\pagebreak
 \printbibliography
+\pagebreak
+\appendix
+\section{Numerical Solution Script}\label{app:efd-script}
+The full \Python script used to evaluate the explicit finite difference scheme is included below:
+\begin{verbatim}
+import json
+import os.path
+
+INPUT_PATH="input.json"
+BASE_OUTPUT_PATH="output/output"
+input = json.load(open(INPUT_PATH))
+
+# Copper Material Properties
+rho = 8933 # kg / m^3
+c_p = 385 # J / kg*K
+if "k_Wm-1K-1" in input:
+    k = input["k_Wm-1K-1"] # W / m*K, default of 401
+else:
+    k = 401
+alph = k / (rho*c_p) # (m^2 / s)
+
+# Fluid properties
+h = input["h_Wm-2K-1"] # W/m^2*K
+T_INF = input["T_INF_C"] # C
+
+# Experiment Setup
+R = input["R_m"] # m
+N_NODES = input["N_NODES"]
+dr = R / (N_NODES - 0.5) # m, chosen so that final node (N-1) + 0.5 corresponds to the radius R, the exact surface  
+T_0 = input["T_0_C"] # C
+t_final = input["total_time_s"] # s
+
+# Secondary setup (necessary dt)
+SAFETY = input["SAFETY"] # Use smaller Fo than necessary
+Bi = h*dr/k # Biot number, dimless
+n_edge = N_NODES-0.5 # n of the last node, corresponds to radius of surface
+n_inge = n_edge-0.5 # n of the border with second to last node (inside edge)
+Fo = SAFETY * (1 / (3 * (n_inge**2/(n_edge**3 - n_inge**3)  +  Bi*n_edge**2/(n_edge**3 - n_inge**3))))
+# print(f"Biot: {Bi}, Fo: {Fo}")
+dt = Fo * dr**2 / alph
+if "dt" in input and not input["dt"]=="auto":
+    dt = input["dt"]
+    Fo = dt*alph / (dr**2)
+print(f"dt: {dt} s")
+
+T_vals:list = [T_0 for i in range(N_NODES)] #
+n_vals:list = [i+0.5 for i in range(N_NODES)] # The actual value n of each node (where radius = n*dr)
+
+
+t_elapsed = 0
+t_steps = []
+T_vals_sets = [] #List of every T distribution at each timestep.
+p = 0
+num_timesteps = t_final / dt
+num_prints = min(input["num_t_output"], num_timesteps)
+print_freq = int(num_timesteps / num_prints)
+
+def push():
+    print(f"T({t_elapsed:2.3f}s) = {[f"{T:.3f}" for T in T_vals]}C")
+    T_vals_sets.append(T_vals)
+    t_steps.append(t_elapsed)
+
+push()
+
+while (t_elapsed < t_final):
+    T_vals_next = [0 for i in range(N_NODES)] # Filler list
+    
+    if N_NODES > 1:
+        # Center node
+        T_n0 = T_vals[0]
+        T_n1 = T_vals[1]
+        n0 = n_vals[0]
+        nh = n0 + 0.5
+        T_vals_next[0] = T_n0 + Fo * (nh**2 / n0**2) * (T_n1-T_n0) 
+
+        for i in range(1, N_NODES-1): # Interior nodes, not special cases
+            n = n_vals[i]
+            T_n = T_vals[i]
+            T_i = T_vals[i-1]
+            T_o = T_vals[i+1]
+
+            T_vals_next[i] = T_n + Fo * ((n+0.5)**2*(T_o-T_n) - (n-0.5)**2*(T_n-T_i)) / n**2
+            # print(f"new T_{i}: {T_vals_next[i]}")
+
+        # Exterior node
+        T_nf = T_vals[-1]
+        T_vals_next[-1] = T_nf + 3*Fo * ((n_inge**2/(n_edge**3 - n_inge**3))*(T_vals[-2]-T_nf) + (Bi*n_edge**2/(n_edge**3 - n_inge**3))*(T_INF-T_nf))
+    else:
+        T_nf = T_vals[0]
+        T_vals_next[0] = T_nf + 3*Fo * (Bi*n_edge**2/(n_edge**3 - n_inge**3))*(T_INF-T_nf)
+
+    
+    t_elapsed += dt
+    T_vals = T_vals_next
+    p+=1
+    
+    if (p % print_freq == 0 or p < 10):
+        push()
+push()
+
+output = {
+    "input":input,
+    "Biot (dr)":Bi,
+    "Biot (D)":h*(2*R)/k,
+    "t_steps":t_steps,
+    "T_vals":T_vals_sets,
+    "dt":dt
+}
+
+next_idx = 0
+output_path = BASE_OUTPUT_PATH + ".json"
+while os.path.isfile(output_path):
+    output_path = BASE_OUTPUT_PATH + f"_{next_idx}.json"
+    next_idx+=1
+json.dump(output, open(output_path, "w"), indent=4)
+
+\end{verbatim}
+
+The script accepts an input such as the example \texttt{input.json}:
+\begin{verbatim}
+{
+    "h_Wm-2K-1": 49.95605733,
+
+    "N_NODES": 10,
+    "dt": "auto",
+    "T_INF_C": 25,
+    "T_0_C": 84,
+    "total_time_s": 1992.525237,
+    "R_m": 0.01,
+    "k_Wm-1K-1": 401,
+    "num_t_output": 50,
+    "SAFETY": 0.75
+}
+\end{verbatim}
+And produces a corresponding output such as \texttt{output.json}:
+\begin{verbatim}
+{
+    "input": {
+        "k_Wm-1K-1": 401,
+        "T_INF_C": 25,
+        "T_0_C": 84,
+        "total_time_s": 1992.525237,
+        "R_m": 0.01,
+        "N_NODES": 10,
+        "h_Wm-2K-1": 49.95605733,
+        "dt": "auto",
+        "num_t_output": 50,
+        "SAFETY": 0.75
+    },
+    "Biot (dr)": 0.00013113547008793803,
+    "Biot (D)": 0.002491573931670823,
+    "dt": 0.0037647702348469264,
+    "t_steps": [
+        0,
+        0.0037647702348469264,
+        ...
+        1992.527235387602
+    ],
+    "T_vals": [
+        [
+            84,
+            84,
+            84,
+            84,
+            84,
+            84,
+            84,
+            84,
+            84,
+            84
+        ],
+        [
+            84.0,
+            84.0,
+            84.0,
+            84.0,
+            84.0,
+            84.0,
+            84.0,
+            84.0,
+            84.0,
+            83.99353554087601
+        ],
+        ...
+        [
+            25.009797880330684,
+            25.009797778653294,
+            25.009797524462186,
+            25.009797129061415,
+            25.009796595285344,
+            25.00979592427711,
+            25.00979511661838,
+            25.009794172652125,
+            25.009793092603644,
+            25.009791876634377
+        ]
+    ]
+}
+where ``...'' denotes values truncated for brevity.
+\end{verbatim}
 \end{document}

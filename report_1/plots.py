@@ -67,12 +67,17 @@ h2 = h*2
 tau = rho*c_p*V / (h2*A)
 T_h2 = T_INF + (T_0-T_INF)*np.exp(-t / tau)
 
-# plt.plot(t, T_A1, label=f"Base h ({h:.3f}W/(m^2K))")
-# plt.plot(t, T_2A, label=f"Double h ({h2:.3f}W/(m^2K))")
-# plt.xlabel("t (s)")
-# plt.ylabel("T (degrees C)")
-# plt.legend()
-# plt.show()
+hh = h*0.5
+tau = rho*c_p*V / (hh*A)
+T_hh = T_INF + (T_0-T_INF)*np.exp(-t / tau)
+
+plt.plot(t, T_A1, label=f"Base h ({h:.3f}W/(m^2K))")
+plt.plot(t, T_h2, label=f"Double h ({h2:.3f}W/(m^2K))")
+plt.plot(t, T_hh, label=f"Half h ({hh:.3f}W/(m^2K))")
+plt.xlabel("t (s)")
+plt.ylabel("T (degrees C)")
+plt.legend()
+plt.show()
 
 
 # Plot analytic vs different dt of FD
@@ -104,19 +109,19 @@ LUMP_200 = load("B_lumped_200step.json")
 
 # Plot analytic vs different k
 
-K_NORM = load("B_15node_1k.json")
-K_SMOL = load("B_15node_0001k.json")
+# K_NORM = load("B_15node_1k.json")
+# K_SMOL = load("B_15node_0001k.json")
 
-def plot_rangeT(output, label):
-    ranges = output['T_vals']
-    plt.fill_between(output['t_steps'], [r[0] for r in ranges], [r[-1] for r in ranges], label=label, alpha=0.4, color="C1")
+# def plot_rangeT(output, label):
+#     ranges = output['T_vals']
+#     plt.fill_between(output['t_steps'], [r[0] for r in ranges], [r[-1] for r in ranges], label=label, alpha=0.4, color="C1")
 
-plot_rangeT(K_SMOL, f"k = 0.401W/mK, Bi = {K_SMOL["Biot (D)"]:.3f}")
-plot_edgeT(K_NORM, f"k = 401W/mK, Bi = {K_NORM["Biot (D)"]:.6f}", color="C0")
+# plot_rangeT(K_SMOL, f"k = 0.401W/mK, Bi = {K_SMOL["Biot (D)"]:.3f}")
+# plot_edgeT(K_NORM, f"k = 401W/mK, Bi = {K_NORM["Biot (D)"]:.6f}", color="C0")
 
-plt.xlabel("t (s)")
-plt.ylabel("T (degrees C)")
-plt.legend()
-plt.show()
+# plt.xlabel("t (s)")
+# plt.ylabel("T (degrees C)")
+# plt.legend()
+# plt.show()
 
 
