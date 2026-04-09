@@ -1,7 +1,7 @@
 \documentclass[12pt]{article}
 \usepackage{graphicx} % Required for inserting images
 
-\title{Computer Project 1: Comparing Analytic and Finite-Difference Numerical solutions to a transient system}
+\title{NRPE 349 Computer Project 1: Comparing Analytic and Finite-Difference Numerical solutions to a Transient Spherical System}
 \author{Owen Strong \\
 \itshape Prof.: Caleb Brooks
 }
@@ -30,9 +30,27 @@
 \maketitle
 \pagebreak
 {\hypersetup{linkcolor=black}\tableofcontents}
+\pagebreak
 \pagenumbering{arabic}
 \begin{abstract}
+    It is very important to understand heat transfer in a wide variety of engineering systems.
+    This includes the transient behavior of such systems, which is not always trivial to analytically evaluate without simplifying assumptions.\\
 
+    In this report, we aim to compare such analytic solutions to explicit finite difference solutions, to compare the effect of key assumptions and parameters for both approaches.\\
+
+    The report considers the transient behavior of a copper sphere in a cooling fluid at $25^\circ$C.
+    The sphere, with diameter $D=20$mm, is known to start at a uniform temperature of $84^\circ$C, and reach a surface temperature of $64^\circ$C after a period of 95 seconds.
+    We compare an analytic solution, using a lumped capacitance model of the sphere, over different variations of surface area to volume ratio and convection coefficient $h$.
+    We additionally construct an explicit finite difference scheme, and compare solutions using this scheme with different discretizations in time and space, and for different conductivity.\\
+
+    The analytical model successfully matched the expected behavior from observed temperature constraints, and yielded a Biot number $B_i=0.00249<0.1$ reassuring the validity of the lumped capacitance approach.
+    Analytical solutions to systems with higher surface area to volume ratios, or higher $h$, showed those systems more quickly decaying to the fluid temperature, and vice versa.\\
+
+    The finite difference numerical solution well approximated the analytical solution at finer time discretization (i.e. smaller timesteps), but deviated substantially with larger timesteps, overshooting how quickly the sphere approached fluid temperature.
+
+    The numerical solution also yielded a substantial temperature gradient across a less conductive material ($k=\frac{k_{Cu}}{1000}$), in comparison to a nearly indistinguishable gradient across the copper sphere over the same discretization (15 radial nodes), demonstrating the limitations and validity of the lumped capacitance assumption.\\
+
+    These results highlight the power of the lumped capacitance model to derive analytical solutions, and the power of finite difference schemes to model such solutions with fewer assumptions, as well as the limitations of either approach, and may serve to guide future heat transfer design and analysis in engineering projects.
 \end{abstract}
 
 \section{Introduction and Background}
@@ -78,14 +96,14 @@ where $\alpha$ is the thermal diffusivity of the material: \\
 \end{equation}
 
 This equation, in either form, can be solved analytically.
-However, doing so in cases considering anything more than one dimension (including considering time) is non-trivial, and quickly devolves into tedious calculus including summations of eigenfunctions.\cite{bergman_fundamentals_2017}\\
+However, doing so in cases considering anything more than one dimension (including time) is non-trivial, and quickly devolves into tedious calculus including summations of orthogonal functions.\cite{bergman_fundamentals_2017}\\
 
-For a transient one-dimensional problem (one with time dependence), there are two immediate techniques to avoid this analysis: the lumped sum approximation, and a numerical simulation.
+For a transient (time-dependent) one-dimensional problem, there are two immediate techniques to avoid this analysis: the lumped capacitance approximation, and a numerical simulation.
 
-In this report, an analytic solution using the lumped sum approximation will be compared to a finite difference numerical solution, for a problem involving a uniform sphere subjected to convection in a cooling fluid.
-\FloatBarrier\subsection{Lump Sum Approximation}
+In this report, an analytic solution using the lumped capacitance approximation will be compared to a finite difference numerical solution, for a problem involving a uniform sphere subjected to convection in a cooling fluid.
+\FloatBarrier\subsection{Lumped Capacitance Approximation and Analytical Solution}
 Consider a uniform sphere which is highly conductive, subjected to convective cooling by a fluid surrounding it.
-One could solve for the temperature distribution within the sphere over time using Equation~\ref{eq:ghde-alpha}, but if the sphere is highly conductive (high $k$) compared to the convective ability of the fluid and surface (low $h$), then one can instead assume a uniform temperature $\bar{T}$ over the surface.
+One could solve for the temperature distribution within the sphere over time using Equation~\ref{eq:ghde-alpha}, but if the sphere is highly conductive (high $k$) compared to the convective ability of the fluid and surface (low $h$), then one can instead assume a uniform temperature $\bar{T}$ over the surface, a ``lumped capacitance'' approximation.
 Applying a control volume around the sphere, uniform over its volume $V$, with a surface area $A$ in contact with the fluid:
 \begin{equation}\label{eq:lumped}
     \rho c_pV\frac{d\bar{T}(t)}{dt} = -hA(\bar{T}(t) - T_f) + q'''
@@ -107,9 +125,9 @@ This equation, which now only considers one variable, can be solved by changing 
     \bar{\theta}=\bar{\theta_0}e^{-\frac{t}{\tau}}
 \end{equation}
 
-If one component out of the material properties contained in the time constant $\tau$, the initial temperature difference $\bar{\theta_0}$, the time $t$, or the temperature difference $\bar{\theta}$ at that time, this equation can be used to solve for the missing value of otherwise known system, such as the convection coefficient necessary in a fluid for a given conductive sphere to go from an initial temperature to a known final temperature within that fluid after a known time.\\
+If one component out of the material properties contained in the time constant $\tau$, the initial temperature difference $\bar{\theta_0}$, the time $t$, or the temperature difference $\bar{\theta}$ at that time is unknown, this equation can be used to solve for the missing value of otherwise known system, such as the convection coefficient necessary in a fluid for a given conductive sphere to go from an initial temperature to a known final temperature within that fluid after a known time.\\
 
-To consider whether it is appropriate to use the lumped sum approximation, the Biot number, a dimensionless quantity relating thermal convection to conduction, should be appropriately low:
+To consider whether it is appropriate to use the lumped capacitance approximation, the Biot number, a dimensionless quantity relating thermal convection to conduction, should be appropriately low:
 \begin{equation}
     \label{eq:biot}
     B_i=\frac{hL}{k}\leq0.1
@@ -176,22 +194,22 @@ then solved for the maximum stable timestep $\Delta t_{max}$:
 
 \section{Experimental Procedure}\label{sec:methods}
 \newcommand{\Python}{\texttt{Python}\xspace}
-A \Python script was constructed, implementing Equations~\ref{eq:efd}, \ref{eq:fd-surface}, and \ref{eq:stability} to solve for the temperature distribution within a pure copper sphere (Using tabulated material propertiy data\cite{bergman_fundamentals_2017}).
+A \Python script was constructed, implementing Equations~\ref{eq:efd}, \ref{eq:fd-surface}, and \ref{eq:stability} to solve for the temperature distribution within a pure copper sphere of diameter $D=20$mm (Using tabulated material propertiy data\cite{bergman_fundamentals_2017}).
 This script, as well as accompanying sample input and output files, are included in Appendix~\ref{app:efd-script}.\\
 
 The initial temperature of the sphere $T_0=84^\circ$C, and surface temperature $T_1=64^\circ$C after known time $t_1=95$s in a fluid of known temperature $T_f=25^\circ$C, are understood for the problem.
 Using the analytical solution in Equation~\ref{eq:anal}, the necessary surface convection coefficient $h$ was solved for.
-Using this value of $h$, the Biot number of the whole sphere was calculated, and used to check the validity of the lumped sum approximation.\\
+Using this value of $h$, the Biot number of the whole sphere was calculated, and used to check the validity of the lumped capacitance approximation.\\
 
 The analytic solution was then evaluated over a range of time $0\leq t \leq t_{final}$, where $t_{final}$ is the analytically evaluated time when the sphere's temperature reaches $\approx25.01^{\circ}$C.
 This evaluation was repeated with variations in geometry, and variations in the convection coefficient $h$ to assess the effects of these system parameters.
 For geometry comparison, the base system was compared to a system of double radius, and a system of identical radius but hypothetical double surface area (approximating a wrinkled surface of sorts).
 For convection coefficient comparison, values of $2h$, $\frac{h}{2}$, and the original $h$ were compared.\\
 
-Using the \Python script, the numerical solution was evaluated first discretized over one node (matching the lumped sum analytic solution) and over various different $\Delta t$ and compared to the analytic solution, to assess the effect of varying time frequency.
+Using the \Python script, the numerical solution was evaluated first discretized over one node (matching the lumped capacitance analytic solution) and over various different $\Delta t$ and compared to the analytic solution, to assess the effect of varying time frequency.
 Three values of $\Delta t$ were assessed: the maximum stable $\Delta t$ evaluated using Equation~\ref{eq:stability}, a $\Delta t=\frac{t_{final}}{20}$ to yield 20 timesteps, and a $\Delta t = \frac{t_{final}}{200}$ to yield 200 timesteps.\\
 
-Finally, using a radial discretization across 15 nodes, numerical solutions were made for a system with the original parameters, and a system with heavily reduced conduction $\frac{k}{1000}$ to show the effect of Biot number on the validity of the lumped sum approximation.
+Finally, using a radial discretization across 15 nodes, numerical solutions were made for a system with the original parameters, and a system with heavily reduced conduction $\frac{k_{Cu}}{1000}$ to show the effect of Biot number on the validity of the lumped capacitance approximation.
 \section{Experimental Results}\label{sec:results}
 Using Equation~\ref{eq:anal} and the known parameters of the system at time $t_1=95$s:
 \begin{gather*}
@@ -213,31 +231,31 @@ This yielded a Biot number for the spherical system:
 \begin{equation}
     B_i=\frac{hD}{k}=\frac{49.956\mathrm{\frac{W}{m^2\cdot K}}\cdot 0.02\mathrm{m}}{401\mathrm{\frac{W}{m\cdot K}}}=0.00249<0.1
 \end{equation}
-validating the lumped-sum approximation.
+validating the lumped capacitance approximation.
 \FloatBarrier\subsection{Analytical Solution}
 Using the identified value of $h$, an analytic solution was successfully built according to Equation~\ref{eq:anal}.\\
 
-Using the complete analytic solution yielded a $t_{final}=1992.525\mathrm{s}$:
+Using the complete analytic solution yielded a $t_{final}=1992.525\mathrm{s}=33.21$m:
 \begin{gather*}
     \bar{\theta}=\bar{\theta_0}e^{-\frac{t_{final}}{\tau}}\\
     (25.01-25)=(84-25)e^{-\frac{t_{final}}{\tau}}\\
     e^{-\frac{t_{final}}{\tau}}=\frac{25.01-25}{84-25}\\
     -\frac{t_{final}}{\tau}=\ln{\left(\frac{25.01-25}{84-15}\right)}=-8.68\\
-    t_{final}=8.68\times 229.5\mathrm{s}=\boxed{1992.525\mathrm{s}}
+    t_{final}=8.68\times 229.5\mathrm{s}=\boxed{1992.525\mathrm{s}=33.21\mathrm{m}}
 \end{gather*}
-Figure~\ref{fig:a1-full} showcases the analytic solution across $0\leq t\leq 1992.525\mathrm{s}$, while Figure~\ref{fig:a1-zoom95} focuses on behavior near $t\approx95$s. Based on the low Biot number suggesting validity of the lumped sum approach, and the temperature at $T(t=95\mathrm{s})\approx64^\circ$C closely matching the known observation ($T_{surf}(95\mathrm{s})=64^\circ$C), the analytic solution appears to be a reasonably accurate description of the system, with temperature gradually approaching 25$^\circ$C in exponential decay.
+Figure~\ref{fig:a1-full} showcases the analytic solution across $0\leq t\leq 33.21$m, while Figure~\ref{fig:a1-zoom95} focuses on behavior near $t\approx95$s. Based on the low Biot number suggesting validity of the lumped capacitance approach, and the temperature at $T(t=95\mathrm{s})\approx64^\circ$C closely matching the known observation ($T_{surf}(95\mathrm{s})=64^\circ$C), the analytic solution appears to be a reasonably accurate description of the system, with temperature gradually approaching 25$^\circ$C in exponential decay.\\
 \begin{figure}
     \centering
     \includegraphics[width=\figwidth]{fig/A1_full.png}
-    \caption{The lumped sum analytical solution of $T(t)$ across times $0\leq t\leq 1992.525\mathrm{s}$.}
+    \caption{The lumped capacitance analytical solution of $T(t)$ across times $0\leq t\leq 33.21$m.}
     \label{fig:a1-full}
 \end{figure}
 \begin{figure}
     \centering\includegraphics[width=\figwidth]{fig/A1_zoom95.png}
-    \caption{The lumped sum analytical solution of $T(t)$, focused on $t=95$s.}
+    \caption{The lumped capacitance analytical solution of $T(t)$, focused on $t=95$s.}
     \label{fig:a1-zoom95}
 \end{figure}
-
+\FloatBarrier
 Figure~\ref{fig:a2-sav} compares the transient temperature behavior for spheres of different surface area to volume ratios. 
 % SA to volume ratio 
 \begin{figure}
@@ -257,16 +275,17 @@ Figure~\ref{fig:a2-h} compares the transient temperature behavior for spheres of
 \FloatBarrier\subsection{Numerical Solution}\FloatBarrier
 Using the identified value of $h$, a numerical solution according to the explicit finite difference scheme of Equation~\ref{eq:efd} was successfully constructed, as shown in Appendix~\ref{app:efd-script}, with the following results:\\
 
-In Figure~\ref{fig:b1-dt}, such numerical solutions without discretization in space (having only a single node, akin to the lumped-sum model), are shown for different discretizations in time, with a timestep $\Delta t$ ranging from the minimum stable value of 172.112s to a value of 9.963 seconds (yielding 200 timesteps).
+In Figure~\ref{fig:b1-dt}, such numerical solutions without discretization in space (having only a single node, akin to the lumped capacitance model), are shown for different discretizations in time, with a timestep $\Delta t$ ranging from the minimum stable value of 172.112s to a value of 9.963 seconds (yielding 200 timesteps).
 \begin{figure}
     \centering\includegraphics[width=\figwidth]{fig/B1_dt.png}
-    \caption{A single-node explicit finite difference solution for $T(t)$, evaluated for $\Delta t\in\left\{\Delta t_{max}, \frac{t_{final}}{20}, \frac{t_{final}}{200}\right\}$, compared to the lumped sum analytical solution. }    
+    \caption{A single-node explicit finite difference solution for $T(t)$, evaluated for $\Delta t\in\left\{\Delta t_{max}, \frac{t_{final}}{20}, \frac{t_{final}}{200}\right\}$, compared to the lumped capacitance analytical solution. }    
     \label{fig:b1-dt}
 \end{figure}
 
 Figure~\ref{fig:b1-k} compares solutions with 15 different radial nodes, solving for a range of temperatures from the inside of the sphere to the outside over time.
 Specifically, it compares two such solutions, one for the original system parameters, and one for which the copper of thermal conductivity $k=401\mathrm{\frac{W}{m\cdot K}}$ has been replaced with a material with identical properties saved for a drastically reduced conductivity $k_2=0.401\mathrm{\frac{W}{m\cdot K}}$, resulting in a Biot number $B_{i,2}=2.492$.
 In the figure, the range of minimum (at edge) and maximum (at center) temperatures of the spheres may be observed over time.
+The base system reaches a maximum temperature difference (from center to edge) of 0.031$^\circ$C at $t=39.85$s, while the low conductivity system reaches a maximum difference of 20.78$^\circ$C at $t=78.37$s.\\
 \begin{figure}
     \centering\includegraphics[width=\figwidth]{fig/B1_k.png}
     \caption{A 15-node explicit finite difference solution for $T(t)$ of both the original system, and one with a heavily reduced thermal conductivity $k$ and increased Biot number, showing the range of temperatures at any time $0\leq t\leq t_{final}$ for either system. Both are evaluated with $\Delta t=\Delta t_{max}$ for the given spacial discretization.}
@@ -274,7 +293,7 @@ In the figure, the range of minimum (at edge) and maximum (at center) temperatur
 \end{figure}
 
 \FloatBarrier\section{Discussion}\label{sec:disc}
-Based on the low Biot number $B_i=0.00249<0.1$ suggesting validity of the lumped sum approach, and the analytical temperature at $T(t=95\mathrm{s})\approx64^\circ$C closely matching the known observation ($T_{surf}(95\mathrm{s})=64^\circ$C) in Figure~\ref{fig:a1-zoom95}, the analytic solution displayed in Figure~\ref{fig:a1-full} appears to be a reasonably accurate description of the system, with temperature gradually approaching 25$^\circ$C in exponential decay.\\
+Based on the low Biot number $B_i=0.00249<0.1$ suggesting validity of the lumped capacitance approach, and the analytical temperature at $T(t=95\mathrm{s})\approx64^\circ$C closely matching the known observation ($T_{surf}(95\mathrm{s})=64^\circ$C) in Figure~\ref{fig:a1-zoom95}, the analytic solution displayed in Figure~\ref{fig:a1-full} appears to be a reasonably accurate description of the system, with temperature gradually approaching 25$^\circ$C in exponential decay, slower and slower as the temperature difference driving heat exchange itself becomes lower and lower.\\
 
 Comparison of different geometries in Figure~\ref{fig:a2-sav} highlights a noticeable dependence of behavior on the ratio of surface area to volume.
 The sphere of double radius (yielding half the surface area to volume ratio), approaches the fluid temperature much more slowly, whereas the sphere of identical dimensions with doubled surface area (double the surface area to volume ratio) approaches the fluid temperature much more quickly.\\
@@ -293,10 +312,11 @@ Across the various discretizations in time of single-node finite-difference solu
 This can be explained as a natural consequence of the explicit finite difference scheme.
 Since the temperature at a time $\Delta t$ later is evaluated using the difference in temperature over space \emph{now}, the scheme assumes that the temperature variation over space does not change much over that time period.
 But since the temperature difference driving this change necessarily decays in time, this scheme will consistently overestimate the magnitude of change by some amount.
-For larger and larger values of $\Delta t$, over which the temperature gradient would itself change more and more, this leads to a more and more rapidly decaying solution, as seen in the figure, where the maximally coarse solution using $\Delta t_{max}$ approaches the fluid temperature drastically faster.\\
+For larger and larger values of $\Delta t$, over which the temperature gradient would itself change more and more, this leads to a more and more rapidly decaying solution, as seen in the figure, where the maximally coarse solution using $\Delta t_{max}$ approaches the fluid temperature drastically faster.
+Thus, while evaluating with a finer discretization in time requires more computational resources, it yields much greater accuracy in the resulting solution.\\
 
-Figure~\ref{fig:b1-k} shows the importance of determining whether a lumped-sum approach is valid, and the power of finite difference scheme.
-While for the given system, which has a Biot number of $0.00249$, the lumped sum approach is demonstrably valid, with a nearly imperceptible range of temperatures from the center to the edge, the comparable system with less conductivity quickly develops a very substantial gradient in temperature, eventually taking longer to approach fluid temperature as heat struggles to move from the interior to the surface.
+Figure~\ref{fig:b1-k} shows the importance of determining whether a lumped capacitance approach is valid, and the power of finite difference scheme.
+While for the given system, which has a Biot number of $0.00249$, the lumped capacitance approach is demonstrably valid, with a nearly imperceptible range of temperatures from the center to the edge (0.031$\circ$C at greatest), the comparable system with less conductivity quickly develops a very substantial gradient in temperature (peaking at 20.78$\circ$C), eventually taking longer to approach fluid temperature as heat struggles to move from the interior to the surface.
 
 The spatially-discretized solutions, even with only 15 nodes, allows this transient behavior to be clearly observed without an analytical solution, with the Biot number for an individual differential node remaining sufficiently low to simulate ($B_{i, node}=\frac{h\Delta r}{k}=0.086$).
 
@@ -304,7 +324,21 @@ The spatially-discretized solutions, even with only 15 nodes, allows this transi
 \section{Conclusions}\label{sec:conc}
 The goals of this report were largely met.\\
 
-An analytical model of the system's transient behavior was successfully designed and used to estimate a convection coefficient $h=49.956\mathrm{\frac{W}{m^2\cdot K}}$.
+An analytical model, using the lumped capacitance method, of the system's transient behavior was successfully designed and used to estimate a convection coefficient $h=49.956\mathrm{\frac{W}{m^2\cdot K}}$.
+With the derived value of $h$, the analytical model closely matched the observed temperatures of the system at $t\in\left\{0, 95\mathrm{s}\right\}$, and yielded a Biot number $B_i=0.00249<0.1$ reassuring the validity of the lumped capacitance approach.\\
+
+As expected from the derivation of the model, analytical solutions to systems with higher surface area to volume ratios, or higher $h$, showed those systems more quickly decaying to the fluid temperature, and vice versa.\\
+
+An explicit finite difference solution for the transient behavior of the system was additionally constructed.
+This solution, with fine values of $\Delta t$, closely approximated the analytical solution, whereas for larger values consistently overestimated how rapidly the temperature approached that of the fluid, resulting in an inaccurately low temperature.
+This suggests a trade-off, where an engineer seeking to model the transient thermal behavior of a system with a finite-difference method must determine what resources are worth dedicating to greater and greater solution accuracy, especially in cases such as this where it is known a coarser solution consistently biases the results.\\
+
+The explicit finite difference scheme was also successfully used, with 15 spatial nodes, to show the validity of the lumped capacitance assumption, by comparing the transient temperature distribution over the spherical system over time to that of a less conductive sphere.
+While the observed system exhibited a minimal distribution in temperature, as the lumped capacitance model assumes, the less conductive system (with a Biot number $B_i=2.49>0.1$ predicting invalidity of the lumped capacitance assumption) displays a substantial temperature gradient on the medium timescale, confirming the invalidity of the assumption.
+This demonstrates the power of appropriately designed finite difference solutions to assess temperature distributions which would be unwieldy to solve, such as the transient temperature distribution in a system not conductive enough to assume constant temperature.\\
+
+These results highlight both the usefulness of the lumped capacitance model, and the necessity of understanding when it may be applied, and the power and limitations of numerical solutions such as explicit finite difference schemes to solve for these temperatures without an analytical solution.
+Future work might expand on the precise behavior of different transient systems near critical Biot numbers ($B_o\approx0.1$) to the lumped capacitance model, and different models of finite difference such as implicit schemes.
 % \bibliographystyle{sty/ieeetran}
 \pagebreak
 \printbibliography
@@ -506,6 +540,8 @@ And produces a corresponding output such as \texttt{output.json}:
         ]
     ]
 }
-where ``...'' denotes values truncated for brevity.
 \end{verbatim}
+where ``...'' denotes values truncated for brevity.\\
+
+The full \texttt{output/output.json}, alongside several other example output files, may be found at \url{https://github.com/osanstrong/349-hw/tree/main/cp1}.
 \end{document}

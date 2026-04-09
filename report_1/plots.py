@@ -33,11 +33,11 @@ T = T_INF + (T_0-T_INF)*np.exp(-t / tau)
 
 # print(f"T({t[-1]}): {T[-1]}")
 
-# plt.plot(t, T, label=f"Analytic T(t), D={2*R}m, h={h:.3f}W/(m^2K)")
-# plt.xlabel("t (s)")
-# plt.ylabel("T (degrees C)")
-# plt.legend()
-# plt.show()
+plt.plot([tv/60 for tv in t], T, label=f"Analytic T(t), D={2*R}m, h={h:.3f}W/(m^2K)")
+plt.xlabel("t (m)")
+plt.ylabel("T (degrees C)")
+plt.legend()
+plt.show()
 
 #### Plot A2 ####
 # Base
@@ -53,10 +53,10 @@ V8 = 4/3 * np.pi * R2**3
 A4 = 4 * np.pi * R2**2
 tau = rho*c_p*V8 / (h*A4)
 T_2R = T_INF + (T_0-T_INF)*np.exp(-t / tau)
-# plt.plot(t, T_A1, label=f"Base dimensions: D={2*R}m, A={A*1e6:.2f}cm^2")
-# plt.plot(t, T_2A, label=f"Base radius, double A: D={2*R}m, A={A2*1e6:.2f}cm^2")
-# plt.plot(t, T_2R, label=f"Double radius: D={2*R2}m, A={A4*1e6:.2f}cm^2")
-# plt.xlabel("t (s)")
+# plt.plot([tv/60 for tv in t], T_A1, label=f"Base dimensions: D={2*R}m, A={A*1e6:.2f}cm^2")
+# plt.plot([tv/60 for tv in t], T_2A, label=f"Base radius, double A: D={2*R}m, A={A2*1e6:.2f}cm^2")
+# plt.plot([tv/60 for tv in t], T_2R, label=f"Double radius: D={2*R2}m, A={A4*1e6:.2f}cm^2")
+# plt.xlabel("t (m)")
 # plt.ylabel("T (degrees C)")
 # plt.legend()
 # plt.show()
@@ -71,13 +71,13 @@ hh = h*0.5
 tau = rho*c_p*V / (hh*A)
 T_hh = T_INF + (T_0-T_INF)*np.exp(-t / tau)
 
-plt.plot(t, T_A1, label=f"Base h ({h:.3f}W/(m^2K))")
-plt.plot(t, T_h2, label=f"Double h ({h2:.3f}W/(m^2K))")
-plt.plot(t, T_hh, label=f"Half h ({hh:.3f}W/(m^2K))")
-plt.xlabel("t (s)")
-plt.ylabel("T (degrees C)")
-plt.legend()
-plt.show()
+# plt.plot([tv/60 for tv in t], T_A1, label=f"Base h ({h:.3f}W/(m^2K))")
+# plt.plot([tv/60 for tv in t], T_h2, label=f"Double h ({h2:.3f}W/(m^2K))")
+# plt.plot([tv/60 for tv in t], T_hh, label=f"Half h ({hh:.3f}W/(m^2K))")
+# plt.xlabel("t (m)")
+# plt.ylabel("T (degrees C)")
+# plt.legend()
+# plt.show()
 
 
 # Plot analytic vs different dt of FD
@@ -88,20 +88,20 @@ def load(path):
     
 def plot_edgeT(output, label, color=None):
     if color is None:
-        plt.plot(output["t_steps"], [T[-1] for T in output["T_vals"]], label=label)
+        plt.plot([t/60 for t in output['t_steps']], [T[-1] for T in output["T_vals"]], label=label)
     else:
-        plt.plot(output["t_steps"], [T[-1] for T in output["T_vals"]], label=label, c=color)
+        plt.plot([t/60 for t in output['t_steps']], [T[-1] for T in output["T_vals"]], label=label, c=color)
     
 LUMP_MIN = load("B_lumped_auto.json")
 LUMP_20 = load("B_lumped_20step.json")
 LUMP_200 = load("B_lumped_200step.json")
 
-# plt.plot(t, T_A1, label=f"Analytical solution")
+# plt.plot([tv/60 for tv in t], T_A1, label=f"Analytical solution")
 # plot_edgeT(LUMP_MIN, label=f"Minimum stable dt: {LUMP_MIN["dt"]:.3f}s")
 # plot_edgeT(LUMP_20, label=f"dt for 20 steps: {LUMP_20["dt"]}s")
 # plot_edgeT(LUMP_200, label=f"dt for 200 steps: {LUMP_200["dt"]}s")
 
-# plt.xlabel("t (s)")
+# plt.xlabel("t (m)")
 # plt.ylabel("T (degrees C)")
 # plt.legend()
 # plt.show()
@@ -109,17 +109,29 @@ LUMP_200 = load("B_lumped_200step.json")
 
 # Plot analytic vs different k
 
-# K_NORM = load("B_15node_1k.json")
-# K_SMOL = load("B_15node_0001k.json")
+K_NORM = load("B_15node_1k.json")
+K_SMOL = load("B_15node_0001k.json")
 
-# def plot_rangeT(output, label):
-#     ranges = output['T_vals']
-#     plt.fill_between(output['t_steps'], [r[0] for r in ranges], [r[-1] for r in ranges], label=label, alpha=0.4, color="C1")
+def plot_rangeT(output, label):
+    ranges = output['T_vals']
+    plt.fill_between([t/60 for t in output['t_steps']], [r[0] for r in ranges], [r[-1] for r in ranges], label=label, alpha=0.4, color="C1")
+
+# ranges = K_SMOL["T_vals"]
+# dT = [r[0]-r[-1] for r in ranges]
+# max_dT = max(dT)
+# i = dT.index(max_dT)
+# print(f"Maximum dT: {max_dT} at t={K_SMOL['t_steps'][i]}s")
+
+# ranges = K_NORM["T_vals"]
+# dT = [r[0]-r[-1] for r in ranges]
+# max_dT = max(dT)
+# i = dT.index(max_dT)
+# print(f"Maximum dT: {max_dT} at t={K_NORM['t_steps'][i]}s")
 
 # plot_rangeT(K_SMOL, f"k = 0.401W/mK, Bi = {K_SMOL["Biot (D)"]:.3f}")
 # plot_edgeT(K_NORM, f"k = 401W/mK, Bi = {K_NORM["Biot (D)"]:.6f}", color="C0")
 
-# plt.xlabel("t (s)")
+# plt.xlabel("t (m)")
 # plt.ylabel("T (degrees C)")
 # plt.legend()
 # plt.show()
