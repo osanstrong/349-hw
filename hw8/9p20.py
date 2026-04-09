@@ -1,5 +1,7 @@
 import thermo as th
 from thermo import HeatCapacityLiquid, ViscosityLiquid, VolumeLiquid, ThermalConductivityLiquid
+import matplotlib.pyplot as plt
+
 T = 310 # K?
 def K(C):
     return C+273.15
@@ -65,12 +67,33 @@ print(f"  -> h = {Nu_val * k(K(40), P) / L} W/m²K")
 
 TH = K(50)
 TC = K(10)
-TS_init = (TH+TC)/2
-TS = TS_init
-print(f"0  TS: {TS:.5f}")
 
-for i in range(10):
+def calc_overall_h(TH, TC, debug=True):
+    TS_init = (TH+TC)/2
+    TS = TS_init
     hH = calc_h(L, TH, TS)
     hC = calc_h(L, TC, TS)
-    TS = (hH*TH + hC*TC) / (hC + hH)
-    print(f"{i}  TS: {TS:.5f}")
+    if debug: print(f"0  TS: {TS:.5f}, hH={hH:.3f}, hC={hC:.3f}")
+
+    for i in range(10):
+        hH = calc_h(L, TH, TS)
+        hC = calc_h(L, TC, TS)
+        TS = (hH*TH + hC*TC) / (hC + hH)
+        if debug: print(f"{i}  TS: {TS:.5f}, hH={hH:.3f}, hC={hC:.3f}")
+
+    h_tot = hC * (TS-TC) / (TH-TC)
+    if debug: print(f"Total h: {h_tot} W/m²K")
+    if debug: print(f"q = {hH*(TH-TS)}\n  = {hC*(TS-TC)}\n  = {h_tot*(TH-TC)}")
+    return h_tot
+
+h_tot_9p20a = calc_overall_h(TH, TC)
+
+TH_vals_C = [i for i in range(20, 61)]
+h_tot_vals = [calc_overall_h(K(TH_val_C), TC, debug=False) for TH_val_C in TH_vals_C]
+# print(h_tot_vals)
+
+plt.plot(TH_vals_C, h_tot_vals, label="Overall h")
+plt.xlabel("Hot process temperature (⁰C)")
+plt.ylabel("Overall h (W/m²K)")
+plt.legend()
+plt.show()
