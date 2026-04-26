@@ -4,7 +4,7 @@
 \title{NRPE 349 Pool Boiling Laboratory}
 \author{Owen Strong \\
 \itshape Prof.: Caleb Brooks \\
-\itshape T.A.: Sohaib Malik
+T.A.: Sohaib Malik
 }
 \date{April 29th, 2026}
 
@@ -14,7 +14,6 @@
 \bibliography{refs.bib}
 
 \usepackage[letterpaper, margin=1in]{geometry}
-\newcommand{\figwidth}{0.75\linewidth}
 
 % Common Macros
 \newcommand{\micCi}{~$\mathrm{\mu Ci}$~}
@@ -30,6 +29,34 @@
 \usepackage{booktabs} % Package provides helpful table formatting
 \usepackage{multicol} % Package for helpful table formatting
 \usepackage{multirow} % Package for helpful table formatting
+% Figure Macros
+\newcommand{\figwidth}{0.75\linewidth}
+\newcommand{\figref}[1]{Fig.~\ref{#1}}
+\newcommand{\defplotW}[3]{
+    \begin{figure}[!htb]
+        \centering
+        \includegraphics[width=#3\linewidth]{fig/#1.png}
+        \caption{#2}
+        \newcommand{\tmplabel}{#1}
+        \label{\tmplabel}
+    \end{figure}
+}
+\newcommand{\defplot}[2]{\defplotW{#1}{#2}{0.75}}
+\newcommand{\defsubplotW}[3]{
+    % \hfill
+    \begin{subfigure}{#3\linewidth}
+        \includegraphics[width=\textwidth]{fig/#1.png}
+        \caption{#2}
+        \newcommand{\tmplabel}{#1}
+        \label{\tmplabel}
+    \end{subfigure}
+    % \hfill
+}
+\newcommand{\defsubplot}[2]{\defsubplotW{#1}{#2}{0.45}}
+
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\pd}[3]{\frac{\partial^{#3}#1}{\partial{#2}^{#3}}}
+% %This makes a new command '\pd' that takes in three arguments. The first is what you're applying the derivative to, the second is the independent variable, and the third is the order. An example usage is \pd{T}{x}{}, which will result in dT/dx or \pd{T}{x}{2} which will result in d^2T/dx^2
 
 
 \begin{document}
@@ -74,8 +101,74 @@ Since the liquid is saturated, that heat goes towards the substantial energy req
 However, this description belies a substantial nuance: while this implies that a plate at higher and higher temperatures can transfer a greater flux of heat into the fluid very efficiently, this is only true up to a certain point.
 Beyond this point (referred to commonly as ``critical heat flux'' $q''_{max}$), the temperature difference is so great that a constant film of fluid begins to form, preventing new fluid from reaching the surface.
 As the surface difference in temperature (typically termed ``excess temperature'', $T_e=T_{surface}-T_{sat,fluid}$) goes further and further beyond that corresponding to the $q_{max}$, this film phenomenon covers more and more of the surface and making heat transfer less and less efficient until no new fluid reaches it at all, in a phenomenon called ``film boiling'' in contrast to the ``nucleate boiling'' described earlier, where new bubbles efficiently cycle new water to the hot surface.
-This new point of critically low heat flux is called the ``Liedenfrost point'' ($q''_{min}$), and this ``Liedenfrost effect'' is often demonstrated by taking a sufficiently hot metal plate and one at a lower excess temperature, around that of critical heat flux, and pouring metal droplets on both.
-At first, the water will boil faster on the colder plate will boil away much faster compared to the extremely hot plate, on which a thin layer of steam at first prevents the droplet of water from touching the plate as it dances around, until eventually reaching a low enough temperature that nucleate boiling returns.
+This new point of critically low heat flux is called the ``Leidenfrost point'' ($q''_{min}$), and this ``Leidenfrost effect'' is often demonstrated by taking a sufficiently hot metal plate and one at a lower excess temperature, around that of critical heat flux, and pouring metal droplets on both.
+At first, the water will boil faster on the colder plate will boil away much faster than on the extremely hot plate, on which a thin layer of steam at first prevents the droplet of water from touching the plate as it dances around, until eventually reaching a low enough temperature that nucleate boiling returns.\\
+
+This variation in behavior over temperature can be described by a ``boiling curve,'' such as seen in \figref{boil_curve}.
+Once film boiling fully develops at the Leidenfrost point, it takes even higher temperatures and radiation heat transfer (which scales with the fourth power of temperature\cite{bergman_fundamentals_2017}), to reach the same flux as the critical heat flux again.\\
+\defplot{boil_curve}{A typical boiling curve for water at atmospheric pressure, comparing surface heat flux $q''_s$ over different excess temperatures $\Delta T_e=T_s-T_{sat}$.\cite{bergman_fundamentals_2017}}
+
+A system which wanted to take maximal advantage of this increased efficiency by which boiling fluids remove heat would seek to operate close to the critical heat flux, so that large amounts of heat can be removed without a great difference in temperature, but not so close that the system might begin to transfer to film boiling, where heat flux into the fluid would rapidly decrease, and heat rapidly begins to enter the material faster than it can leave through the fluid, almost as if the coolant had been lost entirely (which is usually undesirable\cite{noauthor_three_nodate}).\\
+
+In this report, we intend to observe pool boiling behavior across the curve from nucleate boiling through transition and film boiling.
+Specifically, we aim to characterize these phenomena in a system with a superheated copper ball in water, through a boiling curve which we may compare to theoretical models.
+
+\subsection{Lumped Capacitance Model}
+As the copper ball cools through boiling the water, the temperature of its surface will decrease as heat moves from the copper to the water, allowing us to observe heat transfer over a range of surface temperatures.
+However, without disturbing the very phenomena we aim to investigate, it would be difficult to measure the exact heat transfer at every point on the surface in time.
+Instead, we might most practically measure heat flux indirectly through conservation of energy, since all heat that leaves the superheated object through heat flux must correspond to a decrease of thermal energy in that object (assuming no heat is generated from inside the object, such as by using inductive heating).
+If we were to assume the object were of uniform temperature (such as by using a very conductive material like copper), then this balance of energy could yield a very usable relationship:
+\newcommand{\deriv}[3]{\frac{d^{#3}#1}{d{#2}^{#3}}}
+\begin{equation}
+    q''_sA=hA(T_s-T_{sat})=-\rho_s V c_{p,s}\deriv{T_s}{t}{}
+\end{equation}
+where $\rho_s$, $V$, and $c_{p,s}$ refer to the density, volume, and heat capacity of the sphere, and the sphere is of uniform temperature $T_s$ (i.e. the surface temperature).\\
+
+If an experiment were conducted which yielded paired information about time and sphere temperature over very fine intervals (and the temperature of the fluid could be assumed to remain at approximately saturation temperature $T_sat$), then we could fairly feasibly estimate the flux over the surface:
+\begin{equation}
+    q''_s=h(T_s-T_{sat})=-\frac{\rho_s V c_{p,s}}{A}\deriv{T_s}{t}{}
+\end{equation}
+with the expression $\deriv{T_s}{t}{}$ evaluated for each timestep using finite difference approximations.
+For all timesteps with adjacent timesteps on both sides, a central difference may be used:
+\newcommand{\dTdt}{\deriv{T_s}{t}{}}
+\begin{equation}
+    \left[\dTdt\right]_i\approx\frac{T_{s,i+1}-T_{s,i-1}}{t_{i+1}-t_{i-}}
+\end{equation}
+For the first node, we may use a right-handed approximation in lieu of an earlier timestamp, and for the final node $N$, a left-handed one:
+\begin{equation}
+    \begin{aligned}
+        \left[\dTdt\right]_0 &\approx\frac{T_{s,1}-T_{s,0}}{t_{1}-t_{0}}\\
+        \left[\dTdt\right]_N &\approx\frac{T_{s,N}-T_{s,N-1}}{t_{N}-t_{N-1}}
+    \end{aligned}
+\end{equation}
+
+This estimate of $q''_s$ relies on the aforementioned assumption that the object is of uniform temperature.
+This is known as a ``Lumped capacitance model'', and may for example be satisfied using an extremely conductive material like copper.
+To quantify this assumption, we must compare the expected heat transfer rates out of the sphere by convection to those in the sphere by conduction.
+If conduction is much more effective, then for any change in surface temperature through convection, we can expect there to be a negligible gradient between the contents of the object as the material efficiently conducts heat from non-surface regions to the surface or vice versa.
+If the model is appropriate for this experiment, then we may characterize the surface temperature at every timestep to be uniform across the object, and equivalent to some measured temperature $T$ within the sphere:
+\begin{equation}
+    \begin{gathered}
+        T_{s,i}=T_i\\
+        \Delta T_{e,i} = T_{s,i}-T_{sat}=T_i-T_{sat}
+    \end{gathered}
+\end{equation}
+
+This assumption may be characterized using the Biot number $Bi$:
+\begin{equation}
+    Bi=\frac{hL_c}{k}
+    \label{eq:biot}
+\end{equation}
+where $h$ and $k$ are the coefficients of convection (between the object and fluid) and conduction (within the object), respectively, and $L_c$ is the characteristic length that heat needs to move within the object.
+A low Biot number corresponds to a system where internal conduction is more efficient than surface convection, and a higher Biot number vice versa.
+To assume uniform temperature change and use a lumped capacitance model requires that the Biot number be low, typically lower than 0.1.
+Thus, for an experiment using a spherical object of radius $R$ in water, the following equation must be satisfied:
+\begin{equation}
+    Bi=\frac{hR}{k}<0.1
+    \label{eq:biot_sphere}
+\end{equation}
+While $k$ can be tabulated for a known material at different temperatures, the coefficient $h$ describes precisely the convective phenomena we seek to measure.
+Thus, instead of knowing for certain that this model will be satisfied prior to the experiment, we must assess afterwards using our experimentally-derived $q''_s$ and $h$ that the experiment satisfies the Biot number required in Eq.~\ref{eq:biot_sphere}.
 
 
 \FloatBarrier
@@ -92,5 +185,4 @@ At first, the water will boil faster on the colder plate will boil away much fas
 \printbibliography
 \clearpage
 \appendix
-\section{Numerical Solution Script}\label{app:efd-script}
 \end{document}
