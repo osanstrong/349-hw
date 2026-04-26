@@ -1,0 +1,96 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx} % Required for inserting images
+
+\title{NRPE 349 Pool Boiling Laboratory}
+\author{Owen Strong \\
+\itshape Prof.: Caleb Brooks \\
+\itshape T.A.: Sohaib Malik
+}
+\date{April 29th, 2026}
+
+\usepackage[
+    style=ieee
+]{biblatex}
+\bibliography{refs.bib}
+
+\usepackage[letterpaper, margin=1in]{geometry}
+\newcommand{\figwidth}{0.75\linewidth}
+
+% Common Macros
+\newcommand{\micCi}{~$\mathrm{\mu Ci}$~}
+
+\usepackage{placeins} % FloatBarrier
+\usepackage{amsmath} % align
+\usepackage{xcolor}
+\usepackage[colorlinks=true, citecolor=violet, linkcolor=violet, urlcolor=violet]{hyperref}
+\usepackage{enumitem}
+\usepackage{xspace}
+
+% Tables
+\usepackage{booktabs} % Package provides helpful table formatting
+\usepackage{multicol} % Package for helpful table formatting
+\usepackage{multirow} % Package for helpful table formatting
+
+
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagebreak
+{\hypersetup{linkcolor=black}\tableofcontents}
+\pagebreak
+\pagenumbering{arabic}
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction and Background}
+\FloatBarrier
+Boiling, or the heat-induced change of phase from liquid water to vapor, or steam, is a key process in systems from nuclear reactors to those as mundane as a pot on a stove.
+Key in this process is the process of transferring that heat into the water in question.
+Phase change introduces new complications into heat transfer, for a number of reasons.\\
+
+For one, there is quite a substantial energy transfer involved in the phase change itself.
+Table~\ref{tab:phase_props} compares the enthalpy of changing phase at atmospheric pressure, to the heat capacity of liquid and vapor forms of various materials.
+\begin{table}
+    \centering
+    \caption{The enthalpy of vaporization $h_{lv}$ compared to the heat capacity of the same material in saturated liquid or vapor form. All properties evaluated at saturation temperature $T_{sat}$ at atmospheric pressure.}
+    \label{tab:phase_props}
+    \begin{tabular}{c|c|ccc}
+        \hline
+        Material & $T_{sat}$~($\mathrm{K}$) & $c_{p,l}$~($\mathrm{\frac{kJ}{kg\cdot K}}$) & $h_{lv}$~($\mathrm{\frac{kJ}{kg}}$) & $c_{p,v}$~($\mathrm{\frac{kJ}{kg\cdot K}}$)\\
+        \midrule
+        Water & 273.15 & &&\\
+        \hline
+    \end{tabular}
+\end{table}
+
+Additionally, phase change also drastically affects the movement of an object; vapor forms tend to be drastically less dense than then the liquid form.
+Recall that while heat transfer is often divided into conduction and convection, the distinction lies in that convection combines heat \emph{and} mass transfer.
+Heat transfer through conduction is proportional to differences, or the gradient, in temperature through a material, and naturally acts to minimize that gradient over time.
+However efficiently a material can transfer heat from high to low temperature, an additional mass transfer which keeps that difference in temperature high (by replenishing cold fluid receiving heat, or by replenishing hot fluid delivering it) allows for heat to be transferred far more efficiently than by conduction around the temperature gradient alone, and is usually described as a process over the interface between a fluid and another material, as the fluid cycles and refreshes the temperature difference at that boundary.\\
+
+Thus, for a body of fluid where heat enters from the bottom (typically known as pool boiling, with examples including a pot of boiling water on a hot stove), heat enters the liquid form through conduction at the bottom, is absorbed in the cooler, saturated liquid.
+Since the liquid is saturated, that heat goes towards the substantial energy requirement of changing phase, instead of warming it to a higher (and thus less receptive to incoming heat) temperature, and once it boils, that vapor, having much lower density, can form bubbles and rise up through the fluid, agitating it and driving colder, denser fluid quickly to the bottom to repeat the process, allowing for an even more efficient process than by just heating a fluid alone.\\
+
+However, this description belies a substantial nuance: while this implies that a plate at higher and higher temperatures can transfer a greater flux of heat into the fluid very efficiently, this is only true up to a certain point.
+Beyond this point (referred to commonly as ``critical heat flux'' $q''_{max}$), the temperature difference is so great that a constant film of fluid begins to form, preventing new fluid from reaching the surface.
+As the surface difference in temperature (typically termed ``excess temperature'', $T_e=T_{surface}-T_{sat,fluid}$) goes further and further beyond that corresponding to the $q_{max}$, this film phenomenon covers more and more of the surface and making heat transfer less and less efficient until no new fluid reaches it at all, in a phenomenon called ``film boiling'' in contrast to the ``nucleate boiling'' described earlier, where new bubbles efficiently cycle new water to the hot surface.
+This new point of critically low heat flux is called the ``Liedenfrost point'' ($q''_{min}$), and this ``Liedenfrost effect'' is often demonstrated by taking a sufficiently hot metal plate and one at a lower excess temperature, around that of critical heat flux, and pouring metal droplets on both.
+At first, the water will boil faster on the colder plate will boil away much faster compared to the extremely hot plate, on which a thin layer of steam at first prevents the droplet of water from touching the plate as it dances around, until eventually reaching a low enough temperature that nucleate boiling returns.
+
+
+\FloatBarrier
+\clearpage
+\section{Experimental Procedure}\label{sec:methods}
+\clearpage
+\section{Experimental Results}\label{sec:results}
+\FloatBarrier
+\clearpage
+\section{Discussion}\label{sec:disc}
+\clearpage
+\section{Conclusions}\label{sec:conc}
+\clearpage
+\printbibliography
+\clearpage
+\appendix
+\section{Numerical Solution Script}\label{app:efd-script}
+\end{document}
