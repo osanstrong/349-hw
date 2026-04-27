@@ -17,6 +17,8 @@ T.A.: Sohaib Malik
 
 % Common Macros
 \newcommand{\micCi}{~$\mathrm{\mu Ci}$~}
+\newcommand{\degr}{$^\circ$}
+\newcommand{\degC}{\degr C\xspace}
 
 \usepackage{placeins} % FloatBarrier
 \usepackage{amsmath} % align
@@ -105,6 +107,7 @@ This new point of critically low heat flux is called the ``Leidenfrost point'' (
 At first, the water will boil faster on the colder plate will boil away much faster than on the extremely hot plate, on which a thin layer of steam at first prevents the droplet of water from touching the plate as it dances around, until eventually reaching a low enough temperature that nucleate boiling returns.\\
 
 This variation in behavior over temperature can be described by a ``boiling curve,'' such as seen in \figref{boil_curve}.
+This plot starts from a ``free convection'' region where while boiling may occur, effects like bubble formation are slow enough that fluid movement is still dominated by the normal effects of free convection.
 Once film boiling fully develops at the Leidenfrost point, it takes even higher temperatures and radiation heat transfer (which scales with the fourth power of temperature\cite{bergman_fundamentals_2017}), to reach the same flux as the critical heat flux again.\\
 \defplot{boil_curve}{A typical boiling curve for water at atmospheric pressure, comparing surface heat flux $q''_s$ over different excess temperatures $\Delta T_e=T_s-T_{sat}$.\cite{bergman_fundamentals_2017}}
 
@@ -127,18 +130,25 @@ where $\rho_s$, $V$, and $c_{p,s}$ refer to the density, volume, and heat capaci
 If an experiment were conducted which yielded paired information about time and sphere temperature over very fine intervals (and the temperature of the fluid could be assumed to remain at approximately saturation temperature $T_sat$), then we could fairly feasibly estimate the flux over the surface:
 \begin{equation}
     q''_s=h(T_s-T_{sat})=-\frac{\rho_s V c_{p,s}}{A}\deriv{T_s}{t}{}
+    \label{eq:q_experimental}
+\end{equation}
+\begin{equation}
+    h=\frac{q''_s}{T_s-T_{sat}}=-\frac{\rho_s V c_{p,s}}{A(T_s-T_{sat})}\deriv{T_s}{t}{}
+    \label{eq:h_experimental}
 \end{equation}
 with the expression $\deriv{T_s}{t}{}$ evaluated for each timestep using finite difference approximations.
 For all timesteps with adjacent timesteps on both sides, a central difference may be used:
 \newcommand{\dTdt}{\deriv{T_s}{t}{}}
 \begin{equation}
     \left[\dTdt\right]_i\approx\frac{T_{s,i+1}-T_{s,i-1}}{t_{i+1}-t_{i-}}
+    \label{eq:diff_center}
 \end{equation}
 For the first node, we may use a right-handed approximation in lieu of an earlier timestamp, and for the final node $N$, a left-handed one:
 \begin{equation}
     \begin{aligned}
         \left[\dTdt\right]_0 &\approx\frac{T_{s,1}-T_{s,0}}{t_{1}-t_{0}}\\
         \left[\dTdt\right]_N &\approx\frac{T_{s,N}-T_{s,N-1}}{t_{N}-t_{N-1}}
+        \label{eq:diff_edge}
     \end{aligned}
 \end{equation}
 
@@ -170,13 +180,40 @@ Thus, for an experiment using a spherical object of radius $R$ in water, the fol
 While $k$ can be tabulated for a known material at different temperatures, the coefficient $h$ describes precisely the convective phenomena we seek to measure.
 Thus, instead of knowing for certain that this model will be satisfied prior to the experiment, we must assess afterwards using our experimentally-derived $q''_s$ and $h$ that the experiment satisfies the Biot number required in Eq.~\ref{eq:biot_sphere}.
 
+\subsection{Existing Models}
+The phenomena through pool boiling are not without previous study.
+Of the behavioral regions in \figref{boil_curve}, free convection, nucleate boiling, and film boiling have been approximated through several correlations.\cite{bergman_fundamentals_2017}.\\
+
+% Free convection
+
+% Nucleate Boiling
+
+% Film Boiling
+
 
 \FloatBarrier
 \clearpage
 \section{Experimental Procedure}\label{sec:methods}
+\FloatBarrier
+% Quick description
+A setup was constructed, seen in \figref{lab_setup}, to observe a superheated copper ball in saturated water.
+An inductive heater attached to a high voltage power supply heated a furnace constructed from insulating bricks, and used to heat the ball (held from a rod) up to nearly 600\degC.
+A large container of water was prepared and held at saturation temperature (approximately 100\degC) using a hot plate.
+After the ball was after which point it was dropped into the water (at an initial temperature of 562\degc).
+ 
+% Figure of the setup
+\defplot{lab_setup}{The setup used in this laboratory, featuring a furnace to heat a copper ball, which is then placed into the pictured water (held at atmospheric $T_{sat}$.)}
+
+
+% Data were saved as a series 
+
 \clearpage
 \section{Experimental Results}\label{sec:results}
 \FloatBarrier
+% Pool boiling curve
+
+% "Using the equations, we find this data"
+
 \clearpage
 \section{Discussion}\label{sec:disc}
 \clearpage
