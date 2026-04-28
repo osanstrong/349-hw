@@ -53,6 +53,7 @@ get_rho = lambda T_K: 1/get_v(T_K) # kg / m3
 # get_R = lambda T_K: 
 
 qii = -MASS*cp*(dT/dt)/A
+print(f"Maximum q'': {max(qii[1:])} W / m²")
 h = qii / (T-T_SAT)
 Bi = h * R / k
 # print(qii) # W / m2
@@ -107,6 +108,7 @@ C = PI / 24 # Zuber constant
 qii_max = C * h_fg * rho_v * (sigma * g  * (rho_l - rho_v) / (rho_v**2))**0.25
 
 i_max = qii.argmax()
+print(f"Temperatur")
 i_crit = abs(qii_nuc - qii_max).argmin()
 # T_nuc = np.linspace
 
