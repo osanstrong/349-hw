@@ -22,6 +22,7 @@ T.A.: Sohaib Malik
 
 \usepackage{placeins} % FloatBarrier
 \usepackage{amsmath} % align
+\usepackage{amssymb}
 \usepackage{xcolor}
 \usepackage[colorlinks=true, citecolor=violet, linkcolor=violet, urlcolor=violet]{hyperref}
 \usepackage{enumitem}
@@ -187,7 +188,7 @@ Of the behavioral regions in \figref{boil_curve}, free convection, nucleate boil
 \newcommand{\Te}{\Delta T_e}
 % Free convection
 \subsubsection{Free Convection}
-For low temperatures (\~$\Te \lesssim 5$~K), while boiling may occur, convection into the fluid remains dominated by buoyancy forces, and can be modeled as free convection.
+For low temperatures ($\Te \lesssim 5$~K), while boiling may occur, convection into the fluid remains dominated by buoyancy forces, and can be modeled as free convection.
 For a sphere submerged in water, this takes the form\cite{bergman_fundamentals_2017}:
 \begin{equation}
     \begin{gathered}
@@ -266,6 +267,8 @@ Using a digitizer and a laptop, the temperature was measured at precise interval
 \FloatBarrier
 The sphere was successfully superheated and dropped into the water at an initial temperature of 562\degC (for an initial $\Delta T_e=462~K$), and time and temperature data recorded every 0.02~s for 114.78~s, reaching a final temperature of 104.01\degC.
 Using Eq.~\ref{eq:q_experimental} and necessary assumptions, we calculated the heat flux $q''_s$ across the sphere surface for each timestamp, and plot against corresponding $\Delta T_e$ in \figref{exp_curve}, comparing to correlations found using Eqs.~\ref{eq:free_boil} through \ref{eq:film_boil}.
+We identify regions I, II, III, and IV on the plot, which we believe correspond to free convection, nucleate boiling, transitional boiling, and film boiling, grouping expected regions I and II as while both may be observed a clear distinction between the two was not obvious.\\
+
 We then evaluated $h$ and $Bi$ using Eqs.~\ref{eq:h_experimental} and \ref{eq:biot_sphere} for the sphere, and plot $Bi$ using experimental data in \figref{biot_curve}
 % Pool boiling curve
 \defplot{exp_curve}{The boiling curve found using experimental data with the lumped capacitance approximation. At temperatures higher than 240~K (labeled ``$Bi=0.1$''), the Biot number of the system was found to be self-consistently less than 0.1, as required in the lumped capacitance approximation.}
@@ -273,18 +276,28 @@ We then evaluated $h$ and $Bi$ using Eqs.~\ref{eq:h_experimental} and \ref{eq:bi
 % "Using the equations, we find this data"
 
 \clearpage
+\FloatBarrier
 \section{Discussion}\label{sec:disc}
-Qualitatively, the boiling curve derived in \figref{exp_curve} shares similarity to existing models like in \figref{boil_curve}, featuring a rapid increase in $q''_s$ with $\Te$ at low $\Te$, until a maximum $q''_s\approx10^6 W/m^2$ beyond which higher temperatures correlate to lower $q''_s$.
-However, the models of Eq.~\ref{eq:free_boil} through \ref{eq:film_boil}, despite featuring similar shapes (and plotted on the same \figref{exp_curve}), do not line up with our interpretation of experimental data.\\
+Qualitatively, the boiling curve derived in \figref{exp_curve} shares similarity to existing models like in \figref{boil_curve}, featuring a rapid increase in $q''_s$ with $\Te$ at low $\Te$, until a maximum $q''_s\approx10^6 W/m^2$ (comparable to the Zuber models in Eq.~\ref{eq:qmax}) beyond which higher temperatures correlate to lower $q''_s$ (Regions I and II, corresponding to free convection and nucleate boiling, are grouped together as we do not observe a clear distinction between the two as expected from \figref{boil_curve}).
+However, the models of Eq.~\ref{eq:free_boil} through \ref{eq:film_boil}, despite featuring similar shapes (and plotted on the same \figref{exp_curve}), do not line up with our interpretation of experimental data, notably predicting behavior over very different ranges of temperature (for both nucleate boiling and film boiling).\\
 
 When validating the assumptions of our model, we encounter a plausible explanation for this discrepancy: the sphere is not conductive enough to assume lumped capacitance over the full range of observations.
 In \figref{biot_curve}, we compare the Biot number under the assumptions of the model to the maximum $Bi<0.1$ permitting a lumped capacitance approximation, and find that our assumption of lumped capacitance is only self-consistent for the most extreme temperatures, in excess of $\Te\gtrsim 240~K$.
 This inaccuracy very plausibly explains the discrepancies: While the temperature corresponding to $q''_s$ across different regions should be evaluated at the surface, if the Biot number is too high then our thermocouple measurements towards the center of the sphere do not accurately reflect the surface temperature $T_s$ to calculate $\Te=T_s-T_{sat}$.
-The thermocouple temperature would instead be substantially higher than $T_s$, potentially explaining, for example, the higher temperature of $q''_{max}$ seen in \figref{exp_curve}, compared with that found using Eq.~\ref{eq:nucl_boil}.\\
+The thermocouple temperature would instead be substantially higher than $T_s$, potentially explaining, for example, the higher temperatures of $q''_{max}$ and $\qmin$ seen in \figref{exp_curve}, compared with those found using Eqs.~\ref{eq:qmax} and \ref{eq:qmin}.\\
 
-Additionally, while there is a plateau in $q''_s$ as expected, it remains substantially higher than the expected $\qmin\approx 19kW/m^2$ found using Eq.~\ref{eq:qmin}
+Additionally, while there is a plateau in $q''_s$ as expected from the Zuber models, it remains substantially higher than the expected $\qmin\approx 19kW/m^2$ found using Eq.~\ref{eq:qmin}
 \clearpage
 \section{Conclusions}\label{sec:conc}
+The experiment was of qualified success.
+Pool boiling was successfully observed of a copper sphere in saturated water across a wide range of excess heat (with thermocouple temperatures ranging from 104\degC to 562\degC).\\
+
+Using a lumped capacitance approximation of the sphere, we observe a boiling curve qualitatively similar to established models, and with a critical heat flux $q''_{max}$ on the order of $10^6~\mathrm{\frac{W}{m^2}}$.
+However, the curve, particularly with regard to temperature, lacks numeric correspondence with models of free convection, nucleate boiling, or film boiling, and the model produces Biot numbers well in excess of 0.1 for all temperatures lower than 340\degC, confirming the invalidity of the model for the data produced in this experiment.\\
+
+Further experiments may improve upon these results, primarily through seeking a more accurate model of experimental properties.
+This might be accomplished either by using a more conductive material (though this may be impractical, as copper is a very conductive material) or a surface interface which provides substantial resistance to convection while still being modellable (which may also be impractical, as it could limit observation of $q''_{max}$ and transition/film boiling).
+Another route of improvement would be to construct a copper sphere with thermocouple measurements closer to the system, to impose temperature similarity requirements over shorter distances than the entire sphere, combined with a model less simplifying than lumped capacitance to estimate the thermal energy leaving the sphere (i.e., without assuming the entire sphere is of uniform temperature).
 \clearpage
 \printbibliography
 \clearpage

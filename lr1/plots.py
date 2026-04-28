@@ -105,7 +105,7 @@ qii_nuc = mu_l * h_fg * np.sqrt(g*(rho_l-rho_v)/sigma) * ((cp_l * (T-T_SAT) / (C
 # Max boiling, eq. 10.6
 C = PI / 24 # Zuber constant 
 qii_max = C * h_fg * rho_v * (sigma * g  * (rho_l - rho_v) / (rho_v**2))**0.25
-# T_max = T[qii.argmax()]
+
 i_max = qii.argmax()
 i_crit = abs(qii_nuc - qii_max).argmin()
 # T_nuc = np.linspace
@@ -145,16 +145,19 @@ print(f"Te of 120: {qii_min:.3f} vs {get_qii_film(100+120)}")
 fig, ax1 = plt.subplots()
 
 
+T_max = T[qii.argmax()]
+T_min = 360+T_SAT
+
 
 
 ax1.plot(T-T_SAT, qii, label="Observed")
-ax1.plot(T[i_crit:]-T_SAT, qii_nuc[i_crit:], label="Theoretical nucleate")
+ax1.plot(T[i_crit:]-T_SAT, qii_nuc[i_crit:], label="Corrolational nucleate")
 # hline(qii_max, "Maximum Convection", x=[10,40])
 ax1.scatter(T[i_crit]-T_SAT, qii_max, label=f"q''max = {qii_max:.3e} W / m²", c="C1")
 # hline(qii_min, "Minimum Convection", x=[100,140])
 ax1.scatter(T[i_crit2]-T_SAT, qii_min, label=f"q''min = {qii_min:.3e} W / m²", c="C2")
-ax1.plot(T[:i_crit2]-T_SAT, qii_film[:i_crit2], label="Theoretical film")
-ax1.plot(T_free-T_SAT, qii_free, label="Theoretical Free Convection")
+ax1.plot(T[:i_crit2]-T_SAT, qii_film[:i_crit2], label="Corrolational film")
+ax1.plot(T_free-T_SAT, qii_free, label="Corrolational Free Convection")
 ax1.set_xlabel("ΔTe (K)")
 ax1.set_ylabel("q'' (W/m²)")
 
@@ -162,8 +165,17 @@ ax1.set_ylabel("q'' (W/m²)")
 ax1.loglog()
 
 qmin, qmax = ax1.get_ylim()
+
+def vbar(Te, ax, label):
+    ax.plot([Te, Te], [qmin, qmax], label=label, c="gray", linestyle="dashed")
 Te_valid = 240
 ax1.plot([Te_valid, Te_valid], [qmin, qmax], label="Bi=0.1")
+vbar((T_max-T_SAT), ax1, None)
+shift = 1.5
+ax1.text(np.sqrt((T_max-T_SAT)*min(T-T_SAT)), qmax/shift, "I/II")
+vbar(T_min-T_SAT, ax1, None)
+ax1.text(np.sqrt((T_max-T_SAT)*(T_min-T_SAT)), qmax/shift, "III")
+ax1.text(np.sqrt((T_min-T_SAT)*(max(T)-T_SAT)), qmax/shift, "IV")
 ax1.set_ylim(qmin, qmax)
 
 
