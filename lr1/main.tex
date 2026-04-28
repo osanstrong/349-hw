@@ -198,8 +198,10 @@ Of the behavioral regions in \figref{boil_curve}, free convection, nucleate boil
 % Quick description
 A setup was constructed, seen in \figref{lab_setup}, to observe a superheated copper ball in saturated water.
 An inductive heater attached to a high voltage power supply heated a furnace constructed from insulating bricks, and used to heat the ball (held from a rod) up to nearly 600\degC.
-A large container of water was prepared and held at saturation temperature (approximately 100\degC) using a hot plate.
-After the ball was after which point it was dropped into the water (at an initial temperature of 562\degc).
+Attached to the ball through the rod was a thermocouple used to measure the internal temperature of the ball.
+A large container of water was prepared and held at saturation temperature (approximately 100\degC, at atmospheric pressure) using a hot plate.
+After the ball reached sufficiently great superheat, it was removed from the furnace and dropped into the water.
+Using a digitizer and a laptop, the temperature was measured at precise intervals over time (every 0.02~seconds), and each temperature paired with a timestamp (relative to the start of the experiment), with both data saved as paired series.
  
 % Figure of the setup
 \defplot{lab_setup}{The setup used in this laboratory, featuring a furnace to heat a copper ball, which is then placed into the pictured water (held at atmospheric $T_{sat}$.)}
@@ -210,12 +212,15 @@ After the ball was after which point it was dropped into the water (at an initia
 \clearpage
 \section{Experimental Results}\label{sec:results}
 \FloatBarrier
+The sphere was successfully superheated and dropped into the water at an initial temperature of 562\degC (for an initial $\Delta T_e=462~K$), and time and temperature data recorded every 0.02~s for 114.78~s, reaching a final temperature of 104.01\degC.
+Using Eq.~\ref{eq:q_experimental} and necessary assumptions, we calculate the heat flux $q''_s$ across the sphere surface for each timestamp, and plot against corresponding $\Delta T_e$ in \figref{}
 % Pool boiling curve
 
 % "Using the equations, we find this data"
 
 \clearpage
 \section{Discussion}\label{sec:disc}
+
 \clearpage
 \section{Conclusions}\label{sec:conc}
 \clearpage
