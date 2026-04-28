@@ -120,17 +120,50 @@ i_crit2 = abs(qii_film - qii_min).argmin()
 print(f"Te of 120: {qii_min:.3f} vs {get_qii_film(100+120)}")
 
 
-plt.plot(T-T_SAT, qii, label="Observed")
-plt.plot(T[i_crit:]-T_SAT, qii_nuc[i_crit:], label="Theoretical nucleate")
+fig, ax1 = plt.subplots()
+
+
+
+
+ax1.plot(T-T_SAT, qii, label="Observed")
+ax1.plot(T[i_crit:]-T_SAT, qii_nuc[i_crit:], label="Theoretical nucleate")
 # hline(qii_max, "Maximum Convection", x=[10,40])
-plt.scatter(T[i_crit]-T_SAT, qii_max, label=f"q''max = {qii_max:.3e} W / m²", c="C1")
+ax1.scatter(T[i_crit]-T_SAT, qii_max, label=f"q''max = {qii_max:.3e} W / m²", c="C1")
 # hline(qii_min, "Minimum Convection", x=[100,140])
-plt.scatter(T[i_crit2]-T_SAT, qii_min, label=f"q''min = {qii_min:.3e} W / m²", c="C2")
-plt.plot(T[:i_crit2]-T_SAT, qii_film[:i_crit2], label="Theoretical film")
-plt.xlabel("ΔTe (K)")
-plt.ylabel("q'' (W/m²)")
-plt.loglog()
-plt.legend(loc="best")
+ax1.scatter(T[i_crit2]-T_SAT, qii_min, label=f"q''min = {qii_min:.3e} W / m²", c="C2")
+ax1.plot(T[:i_crit2]-T_SAT, qii_film[:i_crit2], label="Theoretical film")
+ax1.set_xlabel("ΔTe (K)")
+ax1.set_ylabel("q'' (W/m²)")
+
+
+ax1.loglog()
+
+qmin, qmax = ax1.get_ylim()
+Te_valid = 240
+ax1.plot([Te_valid, Te_valid], [qmin, qmax], label="Bi=0.1")
+ax1.set_ylim(qmin, qmax)
+
+
+# ax1.set_zorder(1)
+ax1.legend()
+
+
+plt.show()
+fig, ax2 = plt.subplots()
+
+# ax2 = plt.twinx(ax1)
+ax2.plot(T-T_SAT, Bi, label="Biot Number")
+ax2.plot([min(T-T_SAT), max(T-T_SAT)], [0.1, 0.1], label="Te ~ 240 K")
+
+# ax1.loglog()
+ax2.loglog()
+bmin, bmax = ax2.get_ylim()
+ax2.plot([Te_valid, Te_valid], [bmin, bmax], label="Bi=0.1")
+ax2.set_ylim(bmin, bmax)
+ax2.legend(loc="best")
+ax2.set_xlabel("ΔTe (K)")
+ax2.set_ylabel("Bi (-)")
+
 plt.show()
 
 
