@@ -213,9 +213,11 @@ Using a digitizer and a laptop, the temperature was measured at precise interval
 \section{Experimental Results}\label{sec:results}
 \FloatBarrier
 The sphere was successfully superheated and dropped into the water at an initial temperature of 562\degC (for an initial $\Delta T_e=462~K$), and time and temperature data recorded every 0.02~s for 114.78~s, reaching a final temperature of 104.01\degC.
-Using Eq.~\ref{eq:q_experimental} and necessary assumptions, we calculate the heat flux $q''_s$ across the sphere surface for each timestamp, and plot against corresponding $\Delta T_e$ in \figref{}
+Using Eq.~\ref{eq:q_experimental} and necessary assumptions, we calculated the heat flux $q''_s$ across the sphere surface for each timestamp, and plot against corresponding $\Delta T_e$ in \figref{exp_curve}.
+We then evaluated $h$ and $Bi$ using Eqs.~\ref{eq:h_experimental} and \ref{eq:biot_sphere} for the sphere, and plot $Bi$ using experimental data in \figref{biot_curve}
 % Pool boiling curve
-
+\defplot{exp_curve}{The boiling curve found using experimental data with the lumped capacitance approximation. At temperatures higher than 240~K (labeled ``$Bi=0.1$''), the Biot number of the system was found to be self-consistently less than 0.1, as required in the lumped capacitance approximation.}
+\defplot{biot_curve}{The Biot number $Bi$ evaluated for all experimentally calculated $q''_s$ at each temperature, compared the maximum tolerable $Bi<0.1$ for the lumped capacitance approximation.}
 % "Using the equations, we find this data"
 
 \clearpage
