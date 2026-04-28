@@ -184,12 +184,64 @@ Thus, instead of knowing for certain that this model will be satisfied prior to 
 The phenomena through pool boiling are not without previous study.
 Of the behavioral regions in \figref{boil_curve}, free convection, nucleate boiling, and film boiling have been approximated through several correlations.\cite{bergman_fundamentals_2017}.\\
 
+\newcommand{\Te}{\Delta T_e}
 % Free convection
+\subsubsection{Free Convection}
+For low temperatures (\~$\Te \lesssim 5$~K), while boiling may occur, convection into the fluid remains dominated by buoyancy forces, and can be modeled as free convection.
+For a sphere submerged in water, this takes the form\cite{bergman_fundamentals_2017}:
+\begin{equation}
+    \begin{gathered}
+        Ra_D = Gr_DPr = \frac{g\beta(T_s-T_{sat})D^3}{v\alpha}\\
+        \overline{Nu_D}= 2+\frac{0.589 Ra_D^{1/4}}{\left[1+(0.469/Pr)^{9/16}\right]^{4/9}}\\
+        \bar{h} = \overline{Nu_D}k/D\\
+        q''_s=\bar{h}\Te
+    \end{gathered}
+    \label{eq:free_boil}
+\end{equation}
+where $Pr\gtrsim0.7$ and $Ra\lesssim10^{11}$.
 
 % Nucleate Boiling
+\subsubsection{Nucleate Boiling}
+For excess temperatures ranging from \~5~K to the maximum heat flux $q''_{s,max}$, heat transfer is dominated by the forced convection from the bubbles.
+It has been shown\cite{osti_4142385} that across this region $q''_s$ is approximately proportional to $\Te^3$, which is reflected in the most widely used correlation\cite{bergman_fundamentals_2017} for nucleate boiling:
+\begin{equation}
+    q''_s = \mu_lh_{fg}\left[\frac{g(\rho_l-\rho_v)}{\sigma}\right]^{1/2}
+    \label{eq:nucl_boil}
+\end{equation}
+where in this equation, $\sigma$ corresponds to the surface tension of the water, and properties subscripted $l$ or $v$ correspond to liquid or vapor water, respectively.\\
+
+The maximum flux $q''_{s,max}$ (i.e. critical heat flux), beyond which temperature increases into transitional boiling, may be found for a submerged sphere\cite{bergman_fundamentals_2017}:
+\begin{equation}
+    q''_{s,max} = C_Bh_{fg}\rho_v\left[\frac{\sigma g(\rho_l-\rho_v)}{\rho_v^2}\right]^{1/4}
+    \label{eq:qmax}
+\end{equation}
+where for spheres the Zuber constant $C_B = \pi/24$.
 
 % Film Boiling
+\subsubsection{Film Boiling}
+While transition boiling is seldom practically modelled (as most applications typically control power and flux, rather than temperature), the minimum heat flux $q''_{s,min}$ corresponding to the Leidenfrost point at the end of this transition has been studied.
+\newcommand{\qmin}{q''_{s,min}}
+The following correlation of $\qmin$ has been derived by Zuber using stability theory\cite{bergman_fundamentals_2017}:
+\begin{equation}
+    \qmin = 0.09\rho_v h_{fg} \left[\frac{g\sigma(\rho_l-\rho_v)}{(\rho_l+\rho_v)^2}\right]^{1/4}
+    \label{eq:qmin}
+\end{equation}
+In excess temperature beyond the Leidenfrost point, the transition to film boiling is complete, and a continuous vapor film blankets the surface, with no contact between the liquid phase and the surface.
+It is customary, based on observed similarities, to base film boiling correlations on those from condensation theory.
 
+Using these approximations for film boiling on a sphere of diameter $D$\cite{bergman_fundamentals_2017}:
+\begin{equation}
+    \begin{gathered}
+        \overline{Nu_D}=\frac{\bar{h}_{conv}D}{k_v}=0.67\left[\frac{g(\rho_l-\rho_v)h'_{fg}D^3}{v_vk_v\Te}\right]^{1/4} \\
+        \bar{h}_{rad}=\frac{\varepsilon\sigma_{SB}(T_s^4-T_{sat}^4)}{\Te}\\
+        \bar{h}=\bar{h}_{conv} + \frac{3}{4}\bar{h}_{rad}\\
+        q''_s=\bar{h}\Te
+    \end{gathered}
+    \label{eq:film_boil}
+\end{equation}
+where $h'_{fg}=h_fg+0.80c_{p,v}\Te$ is an adjusted latent transition heat to account for sensible energy required to maintain vapor blanket temperature.
+This approximation combines convective transfer correlation derived from condensation ($\bar{h}_{conv}$) with that provided by radiative heat transfer, noticeable at extreme temperatures ($\bar{h}_{rad}$).
+However, at the lower range of practical temperatures, such as those expected in this experiment, radiative heat transfer is a minor and can often still be neglected.
 
 \FloatBarrier
 \clearpage
@@ -213,7 +265,7 @@ Using a digitizer and a laptop, the temperature was measured at precise interval
 \section{Experimental Results}\label{sec:results}
 \FloatBarrier
 The sphere was successfully superheated and dropped into the water at an initial temperature of 562\degC (for an initial $\Delta T_e=462~K$), and time and temperature data recorded every 0.02~s for 114.78~s, reaching a final temperature of 104.01\degC.
-Using Eq.~\ref{eq:q_experimental} and necessary assumptions, we calculated the heat flux $q''_s$ across the sphere surface for each timestamp, and plot against corresponding $\Delta T_e$ in \figref{exp_curve}.
+Using Eq.~\ref{eq:q_experimental} and necessary assumptions, we calculated the heat flux $q''_s$ across the sphere surface for each timestamp, and plot against corresponding $\Delta T_e$ in \figref{exp_curve}, comparing to correlations found using Eqs.~\ref{eq:free_boil} through \ref{eq:film_boil}.
 We then evaluated $h$ and $Bi$ using Eqs.~\ref{eq:h_experimental} and \ref{eq:biot_sphere} for the sphere, and plot $Bi$ using experimental data in \figref{biot_curve}
 % Pool boiling curve
 \defplot{exp_curve}{The boiling curve found using experimental data with the lumped capacitance approximation. At temperatures higher than 240~K (labeled ``$Bi=0.1$''), the Biot number of the system was found to be self-consistently less than 0.1, as required in the lumped capacitance approximation.}
@@ -222,7 +274,15 @@ We then evaluated $h$ and $Bi$ using Eqs.~\ref{eq:h_experimental} and \ref{eq:bi
 
 \clearpage
 \section{Discussion}\label{sec:disc}
+Qualitatively, the boiling curve derived in \figref{exp_curve} shares similarity to existing models like in \figref{boil_curve}, featuring a rapid increase in $q''_s$ with $\Te$ at low $\Te$, until a maximum $q''_s\approx10^6 W/m^2$ beyond which higher temperatures correlate to lower $q''_s$.
+However, the models of Eq.~\ref{eq:free_boil} through \ref{eq:film_boil}, despite featuring similar shapes (and plotted on the same \figref{exp_curve}), do not line up with our interpretation of experimental data.\\
 
+When validating the assumptions of our model, we encounter a plausible explanation for this discrepancy: the sphere is not conductive enough to assume lumped capacitance over the full range of observations.
+In \figref{biot_curve}, we compare the Biot number under the assumptions of the model to the maximum $Bi<0.1$ permitting a lumped capacitance approximation, and find that our assumption of lumped capacitance is only self-consistent for the most extreme temperatures, in excess of $\Te\gtrsim 240~K$.
+This inaccuracy very plausibly explains the discrepancies: While the temperature corresponding to $q''_s$ across different regions should be evaluated at the surface, if the Biot number is too high then our thermocouple measurements towards the center of the sphere do not accurately reflect the surface temperature $T_s$ to calculate $\Te=T_s-T_{sat}$.
+The thermocouple temperature would instead be substantially higher than $T_s$, potentially explaining, for example, the higher temperature of $q''_{max}$ seen in \figref{exp_curve}, compared with that found using Eq.~\ref{eq:nucl_boil}.\\
+
+Additionally, while there is a plateau in $q''_s$ as expected, it remains substantially higher than the expected $\qmin\approx 19kW/m^2$ found using Eq.~\ref{eq:qmin}
 \clearpage
 \section{Conclusions}\label{sec:conc}
 \clearpage

@@ -69,12 +69,33 @@ cp_l = 4217 # J / kg K
 cp_v = 2029
 Pr_l = 1.76
 
+v_l = (279e-6) / rho_l
 v_v = (12.02 / (10**6)) / rho_v # m2 / s
+k_l = 680 / 1000
 k_v = 24.8 / 1000 # W / m K
 
 def hline(qii, label, x = [min(T-T_SAT), max(T-T_SAT)]):
     plt.plot(x, [qii, qii], label=label)
+
+
 # Free convection
+Beta = 750.1e-6 # 1 / K
+def get_Gr(T_C):
+    return g*Beta*(T_C-T_SAT)*((2*R_RT)**3) / (v_l**2)
+def get_Ra(T_C):
+    return get_Gr(T_C)*Pr_l
+def get_NuBarFree(T_C):
+    return 2 + (0.589*(get_Ra(T_C)**0.25)) / ((1 + (0.469/Pr_l)**(9/16))**(4/9))
+def get_hbarFree(T_C):
+    Nu = get_NuBarFree(T_C)
+    return Nu * k_l / (2*R_RT)
+def get_qiiFree(T_C):
+    return get_hbarFree(T_C)*(T_C-T_SAT)
+
+
+T_free = np.linspace(min(T), 105, 30)
+qii_free = get_qiiFree(T_free)
+
 
 # Nucleate Boiling, eq. 10.5
 C_sf = 0.0128
@@ -87,6 +108,7 @@ qii_max = C * h_fg * rho_v * (sigma * g  * (rho_l - rho_v) / (rho_v**2))**0.25
 # T_max = T[qii.argmax()]
 i_max = qii.argmax()
 i_crit = abs(qii_nuc - qii_max).argmin()
+# T_nuc = np.linspace
 
 
 # Min boiling, eq. 10.7
@@ -132,6 +154,7 @@ ax1.scatter(T[i_crit]-T_SAT, qii_max, label=f"q''max = {qii_max:.3e} W / m²", c
 # hline(qii_min, "Minimum Convection", x=[100,140])
 ax1.scatter(T[i_crit2]-T_SAT, qii_min, label=f"q''min = {qii_min:.3e} W / m²", c="C2")
 ax1.plot(T[:i_crit2]-T_SAT, qii_film[:i_crit2], label="Theoretical film")
+ax1.plot(T_free-T_SAT, qii_free, label="Theoretical Free Convection")
 ax1.set_xlabel("ΔTe (K)")
 ax1.set_ylabel("q'' (W/m²)")
 
